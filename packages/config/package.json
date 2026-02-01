@@ -1,0 +1,12 @@
+{
+  "name": "@lendlee/config",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Shared configuration for Loan Tracker (ESLint, Prettier, Tailwind)",
+  "main": "index.cjs",
+  "exports": {
+    "./eslint": "./eslint/index.cjs",
+    "./prettier": "./prettier/index.cjs",
+    "./tailwind": "./tailwind/index.cjs"
+  }
+}

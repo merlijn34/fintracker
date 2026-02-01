@@ -1,0 +1,15 @@
+/** @type {import("eslint").Linter.Config} */
+module.exports = {
+  root: false,
+  env: {
+    es2022: true,
+    browser: true,
+    node: true,
+  },
+  parserOptions: {
+    ecmaVersion: "latest",
+    sourceType: "module",
+  },
+  extends: ["eslint:recommended"],
+}
+
