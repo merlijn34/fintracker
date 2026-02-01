@@ -43,6 +43,7 @@ const items = [
 const user = {
   name: "Charlie Nguyen",
   avatar: "/avatars/charlie-nguyen.jpg",
+  email: "",
 };
 </script>
 
