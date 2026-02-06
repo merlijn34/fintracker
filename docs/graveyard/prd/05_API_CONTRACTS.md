@@ -20,7 +20,8 @@ Content-Type: application/json
   "email": "user@example.com",
   "password": "SecurePass123!",
   "firstName": "John",
-  "lastName": "Doe"
+  "lastName": "Doe",
+  "inviteCode": "optional-invite-code"
 }
 
 Response 201:
@@ -48,6 +49,36 @@ Content-Type: application/json
 {
   "email": "user@example.com",
   "password": "SecurePass123!"
+}
+
+Response 200:
+{
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIs...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIs...",
+    "user": { ... },
+    "mfaRequired": false
+  }
+}
+
+// If MFA required:
+Response 200:
+{
+  "data": {
+    "mfaRequired": true,
+    "mfaToken": "temporary-mfa-token"
+  }
+}
+```
+
+### MFA Verify
+```http
+POST /api/v1/auth/mfa/verify
+Content-Type: application/json
+
+{
+  "mfaToken": "temporary-mfa-token",
+  "code": "123456"
 }
 
 Response 200:
@@ -133,6 +164,8 @@ Response 200:
       "accountableType": "Depository",
       "subtype": "checking",
       "status": "active",
+      "plaidConnected": false,
+      "lastSyncedAt": null,
       "createdAt": "2024-01-15T10:30:00Z"
     }
   ]
@@ -159,6 +192,7 @@ Response 200:
     },
     "subtype": "checking",
     "status": "active",
+    "plaidAccountId": null,
     "lockedAttributes": [],
     "createdAt": "2024-01-15T10:30:00Z",
     "updatedAt": "2024-01-15T10:30:00Z"
@@ -260,6 +294,7 @@ Query params:
 - perPage: number (default: 25, max: 100)
 - accountIds: string[] (comma-separated UUIDs)
 - categoryIds: string[] (comma-separated UUIDs)
+- merchantIds: string[] (comma-separated UUIDs)
 - tagIds: string[] (comma-separated UUIDs)
 - startDate: string (ISO date)
 - endDate: string (ISO date)
@@ -284,6 +319,11 @@ Response 200:
         "name": "Food & Drink",
         "color": "#22c55e",
         "icon": "utensils"
+      },
+      "merchant": {
+        "id": "550e8400-e29b-41d4-a716-446655440004",
+        "name": "Whole Foods",
+        "logoUrl": null
       },
       "tags": [
         { "id": "...", "name": "groceries", "color": "#3b82f6" }
@@ -332,11 +372,13 @@ Response 200:
     "amount": "-125.50",
     "currency": "USD",
     "category": { ... },
+    "merchant": { ... },
     "tags": [ ... ],
     "kind": "standard",
     "excluded": false,
     "notes": "Weekly groceries",
     "lockedAttributes": ["name", "amount"],
+    "plaidId": "plaid_txn_123",
     "createdAt": "2024-01-15T10:30:00Z",
     "updatedAt": "2024-01-15T10:30:00Z"
   }
@@ -355,6 +397,7 @@ Content-Type: application/json
   "name": "Coffee Shop",
   "amount": "-5.50",
   "categoryId": "550e8400-e29b-41d4-a716-446655440001",
+  "merchantId": "550e8400-e29b-41d4-a716-446655440002",
   "tagIds": ["550e8400-e29b-41d4-a716-446655440003"],
   "kind": "standard",
   "notes": "Morning coffee"
@@ -496,6 +539,58 @@ Response 201:
 }
 ```
 
+## Budgets
+
+### Get Budget
+```http
+GET /api/v1/budgets/:monthYear
+Authorization: Bearer {token}
+
+// monthYear format: "jan-2024", "feb-2024", etc.
+
+Response 200:
+{
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "startDate": "2024-01-01",
+    "endDate": "2024-01-31",
+    "currency": "USD",
+    "budgetedSpending": "3000.00",
+    "expectedIncome": "5000.00",
+    "actualSpending": "2150.75",
+    "actualIncome": "5000.00",
+    "categories": [
+      {
+        "categoryId": "...",
+        "categoryName": "Food & Drink",
+        "categoryColor": "#22c55e",
+        "budgeted": "500.00",
+        "actual": "425.50",
+        "available": "74.50",
+        "percentUsed": 85.1,
+        "isOverBudget": false
+      }
+    ]
+  }
+}
+```
+
+### Update Budget Category
+```http
+PATCH /api/v1/budgets/:monthYear/categories/:categoryId
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "budgetedSpending": "600.00"
+}
+
+Response 200:
+{
+  "data": { ... }
+}
+```
+
 ## Balance Sheet
 
 ### Get Balance Sheet
@@ -621,12 +716,265 @@ Response 200:
 }
 ```
 
+## AI Chat
+
+### List Chats
+```http
+GET /api/v1/chats
+Authorization: Bearer {token}
+
+Response 200:
+{
+  "data": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "title": "Monthly spending analysis",
+      "createdAt": "2024-01-15T10:30:00Z",
+      "updatedAt": "2024-01-15T10:35:00Z"
+    }
+  ]
+}
+```
+
+### Create Chat with Message
+```http
+POST /api/v1/chats
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "message": "What did I spend on food last month?"
+}
+
+Response 201:
+{
+  "data": {
+    "chatId": "550e8400-e29b-41d4-a716-446655440000",
+    "messageId": "550e8400-e29b-41d4-a716-446655440001",
+    "status": "processing"
+  }
+}
+```
+
+### Get Chat with Messages
+```http
+GET /api/v1/chats/:id
+Authorization: Bearer {token}
+
+Response 200:
+{
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "title": "Monthly spending analysis",
+    "messages": [
+      {
+        "id": "...",
+        "type": "user_message",
+        "content": "What did I spend on food last month?",
+        "createdAt": "2024-01-15T10:30:00Z"
+      },
+      {
+        "id": "...",
+        "type": "assistant_message",
+        "content": "Based on your transactions, you spent $425.50 on food last month...",
+        "status": "complete",
+        "createdAt": "2024-01-15T10:30:05Z"
+      }
+    ]
+  }
+}
+```
+
+### Send Message
+```http
+POST /api/v1/chats/:id/messages
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "content": "How does that compare to the previous month?"
+}
+
+Response 201:
+{
+  "data": {
+    "messageId": "550e8400-e29b-41d4-a716-446655440001",
+    "status": "processing"
+  }
+}
+```
+
+## Plaid Integration
+
+### Create Link Token
+```http
+POST /api/v1/plaid/link-token
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "region": "us"
+}
+
+Response 200:
+{
+  "data": {
+    "linkToken": "link-sandbox-abc123...",
+    "expiration": "2024-01-15T11:30:00Z"
+  }
+}
+```
+
+### Exchange Public Token
+```http
+POST /api/v1/plaid/items
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "publicToken": "public-sandbox-abc123...",
+  "institutionId": "ins_123",
+  "accountIds": ["account_1", "account_2"]
+}
+
+Response 201:
+{
+  "data": {
+    "plaidItemId": "550e8400-e29b-41d4-a716-446655440000",
+    "accounts": [
+      {
+        "id": "...",
+        "name": "Checking ****1234",
+        "type": "depository"
+      }
+    ],
+    "syncStatus": "pending"
+  }
+}
+```
+
+### Sync Plaid Item
+```http
+POST /api/v1/plaid/items/:id/sync
+Authorization: Bearer {token}
+
+Response 202:
+{
+  "data": {
+    "syncId": "550e8400-e29b-41d4-a716-446655440000",
+    "status": "pending"
+  }
+}
+```
+
+## Imports
+
+### Create Import
+```http
+POST /api/v1/imports
+Authorization: Bearer {token}
+Content-Type: multipart/form-data
+
+FormData:
+- file: (CSV file)
+- type: "TransactionImport" | "TradeImport" | "AccountImport"
+- accountId: (optional) target account UUID
+
+Response 201:
+{
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "status": "pending",
+    "detectedColumns": ["Date", "Description", "Amount"],
+    "rowCount": 150
+  }
+}
+```
+
+### Update Import Configuration
+```http
+PATCH /api/v1/imports/:id/configuration
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "dateColLabel": "Date",
+  "amountColLabel": "Amount",
+  "nameColLabel": "Description",
+  "dateFormat": "%m/%d/%Y",
+  "signageConvention": "inflows_positive"
+}
+
+Response 200:
+{
+  "data": { ... }
+}
+```
+
+### Get Import Rows
+```http
+GET /api/v1/imports/:id/rows
+Authorization: Bearer {token}
+
+Query params:
+- page: number
+- perPage: number
+
+Response 200:
+{
+  "data": [
+    {
+      "id": "...",
+      "date": "01/15/2024",
+      "name": "Coffee Shop",
+      "amount": "-5.50",
+      "category": null,
+      "isValid": true,
+      "errors": []
+    }
+  ],
+  "meta": {
+    "pagination": { ... }
+  }
+}
+```
+
+### Publish Import
+```http
+POST /api/v1/imports/:id/publish
+Authorization: Bearer {token}
+
+Response 202:
+{
+  "data": {
+    "status": "importing",
+    "jobId": "550e8400-e29b-41d4-a716-446655440000"
+  }
+}
+```
+
+### Revert Import
+```http
+POST /api/v1/imports/:id/revert
+Authorization: Bearer {token}
+
+Response 202:
+{
+  "data": {
+    "status": "reverting",
+    "jobId": "550e8400-e29b-41d4-a716-446655440001"
+  }
+}
+```
+
 ## Error Codes
 
 | Code | HTTP Status | Description |
 |------|-------------|-------------|
 | `VALIDATION_ERROR` | 400 | Request validation failed |
 | `INVALID_CREDENTIALS` | 401 | Email or password incorrect |
+| `MFA_REQUIRED` | 401 | MFA verification needed |
+| `MFA_INVALID` | 401 | Invalid MFA code |
 | `UNAUTHORIZED` | 401 | Not authenticated |
 | `FORBIDDEN` | 403 | Not authorized for this resource |
 | `NOT_FOUND` | 404 | Resource not found |

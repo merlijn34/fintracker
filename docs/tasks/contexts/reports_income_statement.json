@@ -1,0 +1,36 @@
+{
+  "context": "Reports: income statement",
+  "tasks": [
+    {
+      "id": "report-is-01",
+      "title": "Income statement endpoint",
+      "scope": "GET /api/v1/income-statement per API contract.",
+      "files": [
+        "apps/api/src/modules/reports/*"
+      ],
+      "acceptance_criteria": [
+        "Returns income/expenses by category",
+        "Supports date range"
+      ],
+      "dependencies": [
+        "txn-create-01",
+        "cat-01"
+      ]
+    },
+    {
+      "id": "report-is-02",
+      "title": "Income statement UI",
+      "scope": "Render income statement report.",
+      "files": [
+        "apps/pwa/pages/analytics/index.vue",
+        "apps/pwa/components/*"
+      ],
+      "acceptance_criteria": [
+        "Displays summary + category breakdown"
+      ],
+      "dependencies": [
+        "report-is-01"
+      ]
+    }
+  ]
+}

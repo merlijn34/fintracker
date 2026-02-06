@@ -10,11 +10,12 @@
 1. [Authentication & User Management](#1-authentication--user-management)
 2. [Account Management](#2-account-management)
 3. [Transaction Management](#3-transaction-management)
-4. [Investment Tracking](#4-investment-tracking)
-5. [Analytics & Reporting](#5-analytics--reporting)
-6. [Data Export & Backup](#6-data-export--backup)
-7. [Settings & Preferences](#7-settings--preferences)
-8. [UI Components & Pages](#8-ui-components--pages)
+4. [Budgeting](#4-budgeting)
+5. [Investment Tracking](#5-investment-tracking)
+6. [Analytics & Reporting](#6-analytics--reporting)
+7. [Data Import/Export](#7-data-importexport)
+8. [Settings & Preferences](#8-settings--preferences)
+9. [UI Components & Pages](#9-ui-components--pages)
 
 ---
 
@@ -287,6 +288,7 @@
 - Quick add form with key fields
 - Optional: expanded form with all fields
 - Form validation (required fields, formats)
+- Category suggestions based on merchant
 - Date defaults to today, can be changed
 - Amount precision to 2 decimal places
 - Auto-detection if transfer
@@ -297,7 +299,7 @@
 ```
 - Date (required, date picker)
 - Amount (required, decimal)
-- Description (required, text, 100 chars)
+- Merchant/Description (required, text, 100 chars)
 - Category (optional, dropdown/autocomplete)
 - Account (required, dropdown, default to current)
 [Save Transaction]
@@ -307,12 +309,14 @@
 ```
 - Date (required)
 - Amount (required)
-- Description (required)
+- Merchant/Description (required)
 - Category (optional)
 - Transaction Type (income/expense/transfer/trade/other)
 - Account (required)
 - Related Account (if transfer)
 - Is Transfer (checkbox, auto-checked if applicable)
+- Exclude from Budget (checkbox)
+- One-Time Expense (checkbox)
 - Reconciliation Status (uncleared/cleared/reconciled)
 - Tags (optional, multi-select)
 - Notes (optional, textarea)
@@ -322,7 +326,7 @@
 **Validation Rules**:
 - Amount: required, positive decimal, max 2 decimals
 - Date: not in future, reasonable range (past 50 years)
-- Description: required, min 1 char, max 100 chars
+- Merchant: required, min 1 char, max 100 chars
 - Category: if filled, must exist
 - Account: must be valid account belonging to user
 - Related account: must be different from source account
@@ -331,10 +335,10 @@
 **Feature**: Display all transactions with filtering/sorting
 
 **Acceptance Criteria**:
-- Table view with columns: date, description, category, amount, account, status
+- Table view with columns: date, merchant, category, amount, account, status
 - Default sort: date (newest first)
-- Sortable columns: date, amount, description
-- Search by description (real-time)
+- Sortable columns: date, amount, merchant
+- Search by merchant or description (real-time)
 - Filter by: account, category, date range, type, reconciliation status
 - Filter indicators showing active filters
 - Pagination: 50 transactions per page
@@ -345,9 +349,9 @@
 
 **Display**:
 ```
-[Date] [Description] [Category] [Amount] [Account] [Status] [Actions]
+[Date] [Merchant] [Category] [Amount] [Account] [Status] [Actions]
 ---
-2/1/2026 | Grocery Store | Groceries | -$42.50 | Checking | Cleared | [edit] [delete]
+2/1/2026 | Whole Foods | Groceries | -$42.50 | Checking | Cleared | [edit] [delete]
 ```
 
 **Filter Panel**:
@@ -365,7 +369,7 @@
 **Acceptance Criteria**:
 - Search box in transaction list header
 - Real-time search as user types
-- Search by: description, notes, category
+- Search by: merchant, description, notes, category
 - Highlight matching text
 - Show result count
 - Clear search button
@@ -381,18 +385,20 @@
 - Validate same as create
 - Show success message on save
 - Option to edit multiple transactions (bulk edit)
+- Recalculates affected budgets
 - Updates account balances
 - Shows what changed (optional: last edited timestamp)
 
 **Editable Fields**:
 - Date
 - Amount
-- Description
+- Merchant
 - Category
 - Account (with warning if changed)
 - Type
 - Tags
 - Notes
+- Exclusion flags
 
 ### 3.5 Delete Transaction
 **Feature**: Remove transaction from system
@@ -401,6 +407,7 @@
 - Confirmation dialog
 - Show transaction details being deleted
 - Warn if within reconciled period
+- Delete cascade: remove from budgets, net worth recalculates
 - Undo within 5 minutes (optional)
 - Delete soft or hard (recommend soft with archive flag)
 
@@ -413,15 +420,52 @@
 - User can modify before saving
 - Useful for recurring manual transactions
 
+### 3.7 Bulk Import (CSV)
+**Feature**: Import multiple transactions from CSV
+
+**Acceptance Criteria**:
+- Upload CSV file (max 10MB, 50,000 rows)
+- Column mapping UI (user maps CSV columns to app fields)
+- Preview of first 10 rows
+- Validation of all rows before import
+- Error report for invalid rows
+- Duplicate detection (by date, amount, merchant)
+- Option: skip duplicates, replace, or ask
+- Import progress indicator
+- Success summary (X transactions imported, Y skipped)
+- Rollback on critical error
+- Support common formats (bank exports, CSV)
+
+**Required CSV Columns**:
+```
+Date,Amount,Merchant,Category,Account,Type
+```
+
+**Optional CSV Columns**:
+```
+Notes,Tags,ReconciledStatus,TransactionType
+```
+
+**Mapping UI**:
+```
+CSV Column: Date → App Field: Date
+CSV Column: Description → App Field: Merchant
+CSV Column: Amount → App Field: Amount
+... (user selects from dropdown)
+```
+
 ### 3.8 Transfer Detection
 **Feature**: Automatically identify and handle transfers
 
 **Acceptance Criteria**:
 - When transaction entered, check if matching amount in opposite direction exists
 - Auto-flag as transfer if: same amount, same date/adjacent dates, between user's accounts
+- Exclude from budget calculations automatically
 - Link both sides of transfer
 - Show visually that it's a transfer
 - User can override auto-detection
+- Mark transfer as "excluded from budget" by default
+- User can mark as "include in budget" (for loan payments, etc.)
 
 **Transfer Logic**:
 ```
@@ -443,7 +487,7 @@ IF same day OR adjacent day THEN high confidence
 - User can create custom categories
 - Category per transaction
 - Categories have icons and colors (optional)
-- Category suggestions based on description history
+- Category suggestions based on merchant history
 - Can bulk recategorize transactions
 - Archive unused categories
 - Category search/filter
@@ -488,7 +532,7 @@ Expenses
   ├── Gifts & Donations
   └── Other Expenses
 
-Transfers
+Transfers (excluded from budgets)
   ├── Between Own Accounts
   ├── Loan Payments
   └── Credit Card Payments
@@ -514,9 +558,108 @@ Investments (optional)
 
 ---
 
-## 4. Investment Tracking
+## 4. Budgeting
 
-### 4.1 Create Investment Account
+### 4.1 Create Budget
+**Feature**: Set spending limits by category
+
+**Acceptance Criteria**:
+- Select category
+- Set monthly limit amount
+- Confirm creation
+- Can set budget for future months
+- Suggest amount based on historical spending (optional)
+- Limit per category per month
+
+**Fields**:
+```
+- Category (required, dropdown)
+- Month (required, date picker, default current month)
+- Limit Amount (required, decimal, positive)
+[Save Budget]
+```
+
+### 4.2 View Budget List
+**Feature**: Show all budgets for current month
+
+**Acceptance Criteria**:
+- Current month default
+- Can view other months
+- Show: category, limit, spent, remaining, percentage
+- Sort by: category, amount, spent, remaining
+- Progress bar showing spent vs limit
+- Color coding: green (under), yellow (near limit), red (over)
+- Quick actions: edit, delete
+- Total budgeted and total spent summary
+
+**Display**:
+```
+Month: February 2026
+
+Category          | Budget | Spent | Remaining | % Used | Actions
+Groceries         | $300   | $245  | $55       | 81%    | [edit] [delete]
+Restaurants       | $150   | $180  | -$30      | 120%   | [edit] [delete]
+Transportation    | $200   | $45   | $155      | 22%    | [edit] [delete]
+...
+TOTAL             | $1000  | $650  | $350      | 65%    |
+```
+
+### 4.3 Edit Budget
+**Feature**: Modify budget limits
+
+**Acceptance Criteria**:
+- Edit limit amount
+- Edit month (move budget to different month)
+- Show historical spending in this category
+- Show this month's spending so far
+- Validate new limit is positive
+- Success message
+
+### 4.4 Delete Budget
+**Feature**: Remove budget
+
+**Acceptance Criteria**:
+- Confirmation dialog
+- Budget deleted for that month/category
+- Can recreate anytime
+- Doesn't affect transactions
+
+### 4.5 Budget Alerts
+**Feature**: Notify when spending approaches limit (optional)
+
+**Acceptance Criteria**:
+- Alert at 80% of budget
+- Alert at 100% (over budget)
+- Optional alert on every transaction that affects budget
+- Toast notification in app
+- Optional email notification
+- Settings to customize alert thresholds
+
+### 4.6 Budget Exclusions
+**Feature**: Mark transactions to exclude from budget
+
+**Acceptance Criteria**:
+- Transfers automatically excluded
+- "One-time expense" flag excludes from budget
+- User can manually mark "exclude from budget"
+- Excludes from budget calculations
+- Still visible in transaction list
+- Useful for unusual expenses
+
+### 4.7 Budget Rollover
+**Feature**: Carry unspent budget to next month (optional)
+
+**Acceptance Criteria**:
+- Option: rollover unspent amount
+- Or: reset budget to 0 each month
+- Show how much rolled over
+- Can be enabled per category or globally
+
+---
+
+## 5. Investment Tracking
+
+### 5.1 Create Investment Account
 **Feature**: Set up investment account for tracking
 
 **Acceptance Criteria**:
@@ -533,7 +676,7 @@ Investments (optional)
 - Opening Balance (often 0 for new accounts)
 ```
 
-### 4.2 Add Investment Trade
+### 5.2 Add Investment Trade
 **Feature**: Record buy/sell transactions for securities
 
 **Acceptance Criteria**:
@@ -565,7 +708,7 @@ Buy: Total Cost = (Shares × Price) + Fees
 Sell: Total Proceeds = (Shares × Price) - Fees
 ```
 
-### 4.3 View Portfolio
+### 5.3 View Portfolio
 **Feature**: See all investments and allocation
 
 **Acceptance Criteria**:
@@ -587,7 +730,7 @@ MSFT   | 5      | $1000      | $420          | $2100 | +$1100          | +110%
 TOTAL  |        |            |               | $4000 | +$1500          | +37.5%
 ```
 
-### 4.4 Edit Trade
+### 5.4 Edit Trade
 **Feature**: Modify recorded trade
 
 **Acceptance Criteria**:
@@ -596,7 +739,7 @@ TOTAL  |        |            |               | $4000 | +$1500          | +37.5%
 - Recalculate cost basis and gains
 - Success message
 
-### 4.5 Delete Trade
+### 5.5 Delete Trade
 **Feature**: Remove trade record
 
 **Acceptance Criteria**:
@@ -604,7 +747,7 @@ TOTAL  |        |            |               | $4000 | +$1500          | +37.5%
 - Recalculate portfolio
 - Deletes trade and its impact on cost basis
 
-### 4.6 Cost Basis Tracking
+### 5.6 Cost Basis Tracking
 **Feature**: Track cost basis for tax purposes
 
 **Acceptance Criteria**:
@@ -618,9 +761,9 @@ TOTAL  |        |            |               | $4000 | +$1500          | +37.5%
 
 ---
 
-## 5. Analytics & Reporting
+## 6. Analytics & Reporting
 
-### 5.1 Dashboard/Overview
+### 6.1 Dashboard/Overview
 **Feature**: Show key financial metrics at a glance
 
 **Acceptance Criteria**:
@@ -628,6 +771,7 @@ TOTAL  |        |            |               | $4000 | +$1500          | +37.5%
 - Show: net worth, change from last month, main accounts
 - Quick stats: total income, total expenses, net
 - Recent transactions (5-10 items)
+- Budget summary (total spent vs budgeted)
 - Account breakdown (pie chart)
 - Links to detailed views
 - Responsive on mobile
@@ -643,15 +787,20 @@ TOTAL  |        |            |               | $4000 | +$1500          | +37.5%
    - Top 5 accounts by balance
    - Quick links to each
 
-3. **Recent Transactions**
+3. **Budget Summary**
+   - This month: total budgeted, total spent, remaining
+   - % of budget used
+
+4. **Recent Transactions**
    - Last 10 transactions
    - Link to full list
 
-4. **Quick Actions**
+5. **Quick Actions**
    - Add transaction
    - Add account
+   - View budgets
 
-### 5.2 Net Worth Report
+### 6.2 Net Worth Report
 **Feature**: Track net worth over time
 
 **Acceptance Criteria**:
@@ -686,7 +835,7 @@ Liabilities:
 Net Worth: $50,000
 ```
 
-### 5.3 Spending Report
+### 6.3 Spending Report
 **Feature**: Analyze spending by category
 
 **Acceptance Criteria**:
@@ -697,6 +846,7 @@ Net Worth: $50,000
 - Exclude transfers from calculations
 - Top spending categories highlighted
 - Drill down: click category to see transactions
+- Compare to budget limits
 - Compare to previous period
 - Export data
 
@@ -713,7 +863,7 @@ Other: $100 (9%)
 Total: $1,325
 ```
 
-### 5.4 Income vs Expenses
+### 6.4 Income vs Expenses
 **Feature**: Track income and expense trends
 
 **Acceptance Criteria**:
@@ -726,7 +876,7 @@ Total: $1,325
 - Custom date range
 - Filter by category (optional)
 
-### 5.5 Category Analysis
+### 6.5 Category Analysis
 **Feature**: Detailed analysis per category
 
 **Acceptance Criteria**:
@@ -734,10 +884,11 @@ Total: $1,325
 - Show: total, monthly average, trend, transactions
 - Breakdown by month
 - Transaction list for category
+- Budget vs actual
 - Historical spending (year-over-year)
 - Seasonal patterns (optional)
 
-### 5.6 Charts & Visualizations
+### 6.6 Charts & Visualizations
 **Feature**: Visual representations of financial data
 
 **Acceptance Criteria**:
@@ -752,12 +903,12 @@ Total: $1,325
 
 **Chart Library**: D3.js, Chart.js, or equivalent
 
-### 5.7 Export Reports
+### 6.7 Export Reports
 **Feature**: Download financial data
 
 **Acceptance Criteria**:
 - Export formats: CSV, JSON, PDF
-- Choose what to export: transactions, accounts, reports
+- Choose what to export: transactions, accounts, budgets, reports
 - Date range selection
 - Include/exclude transfers
 - Download directly
@@ -766,25 +917,50 @@ Total: $1,325
 **Export Options**:
 - Transactions (all, by account, by date range)
 - Accounts (summary)
+- Budgets (current month, custom month)
 - Net worth report
 - Spending report
 
 ---
 
-## 6. Data Export & Backup
+## 7. Data Import/Export
 
-### 6.1 Full Data Export
+### 7.1 CSV Import (Transactions)
+**Feature**: Bulk import transaction data from CSV
+
+**Specifications** (see feature 3.7 - Transaction Bulk Import)
+
+### 7.2 Account Setup Import
+**Feature**: Import multiple accounts from CSV
+
+**Acceptance Criteria**:
+- CSV with account list
+- Map columns to account fields
+- Validate all accounts before import
+- Import creates all accounts at once
+- Show summary of imported accounts
+- Handle errors (duplicate names, invalid types)
+
+**CSV Format**:
+```
+Name,Type,Currency,Institution,Balance,Date
+Checking,checking,USD,Bank of America,5000,2026-02-01
+Savings,savings,USD,Bank of America,25000,2026-02-01
+Credit Card,credit_card,USD,Chase,2500,2026-02-01
+```
+
+### 7.3 Full Data Export
 **Feature**: Export all user data for backup
 
 **Acceptance Criteria**:
-- Export all accounts, transactions, categories
+- Export all accounts, transactions, budgets, categories
 - Format: JSON (machine-readable) or CSV (human-readable)
 - Include metadata (export date, version)
 - Encrypted download (optional)
 - Can be used to restore in another instance
 - Personal data removed for anonymization (optional)
 
-### 6.2 Data Backup
+### 7.4 Data Backup
 **Feature**: Automatic data backup (self-hosted)
 
 **Acceptance Criteria**:
@@ -798,9 +974,9 @@ Total: $1,325
 
 ---
 
-## 7. Settings & Preferences
+## 8. Settings & Preferences
 
-### 7.1 User Settings
+### 8.1 User Settings
 **Feature**: Manage account preferences
 
 **Sections**:
@@ -822,6 +998,7 @@ Preferences
   - Timezone: dropdown
 
 Notifications
+  - Budget alerts: checkbox + threshold %
   - Transaction reminders: checkbox
   - Email notifications: checkbox
   - Push notifications: checkbox (if PWA)
@@ -835,9 +1012,10 @@ Privacy
 Advanced
   - API tokens: generate/revoke (optional)
   - Connected apps: manage integrations (future)
+  - Import settings: manage import rules
 ```
 
-### 7.2 Preferred Currency
+### 8.2 Preferred Currency
 **Feature**: Set default currency for display
 
 **Acceptance Criteria**:
@@ -847,7 +1025,7 @@ Advanced
 - Multi-currency calculations correct
 - Historical conversion uses appropriate rates
 
-### 7.3 Theme Preference
+### 8.3 Theme Preference
 **Feature**: Dark/light theme support
 
 **Acceptance Criteria**:
@@ -859,7 +1037,7 @@ Advanced
 - Charts readable in both themes
 - No forced color scheme
 
-### 7.4 Data & Privacy
+### 8.4 Data & Privacy
 **Feature**: User control over personal data
 
 **Acceptance Criteria**:
@@ -872,9 +1050,9 @@ Advanced
 
 ---
 
-## 8. UI Components & Pages
+## 9. UI Components & Pages
 
-### 8.1 Main Navigation
+### 9.1 Main Navigation
 **Feature**: Navigate between app sections
 
 **Layout**:
@@ -890,13 +1068,14 @@ Advanced
 - Dashboard
 - Accounts
 - Transactions
+- Budgets
 - Analytics
 - Settings
 - Help/Docs
 - Logout
 ```
 
-### 8.2 Header/Top Bar
+### 9.2 Header/Top Bar
 **Feature**: Top bar with quick actions and info
 
 **Elements**:
@@ -908,7 +1087,7 @@ Advanced
 - Notification bell (if notifications enabled)
 - Mobile: hamburger menu button
 
-### 8.3 Sidebar (Desktop)
+### 9.3 Sidebar (Desktop)
 **Feature**: Navigation sidebar
 
 **Layout**:
@@ -916,9 +1095,10 @@ Advanced
 - Show/hide items based on screen size
 - Sticky position
 - Quick account list (favorites?)
+- Quick budget summary
 - Dark background (inverse to main content)
 
-### 8.4 Account List Page
+### 9.4 Account List Page
 **Feature**: /accounts route
 
 **Layout**:
@@ -931,7 +1111,7 @@ Advanced
 - Account type icons
 - Quick actions
 
-### 8.5 Account Detail Page
+### 9.5 Account Detail Page
 **Feature**: /accounts/:id route
 
 **Layout**:
@@ -943,20 +1123,20 @@ Advanced
 - Add transaction button
 - Reconcile button
 
-### 8.6 Transaction List Page
+### 9.6 Transaction List Page
 **Feature**: /transactions route
 
 **Layout**:
 - Page header: "Transactions"
 - Filters: account, category, date range, status, type
 - Search box
-- Sorting: date, amount, description
+- Sorting: date, amount, merchant
 - Transaction table
 - Pagination (50 per page)
 - Add transaction button
 - Bulk actions: delete selected, recategorize, tag
 
-### 8.7 Transaction Add/Edit Page
+### 9.7 Transaction Add/Edit Page
 **Feature**: /transactions/new, /transactions/:id/edit routes
 
 **Layout**:
@@ -968,7 +1148,19 @@ Advanced
 - Cancel button
 - Help text for complex fields
 
-### 8.8 Analytics Page
+### 9.8 Budget Page
+**Feature**: /budgets route
+
+**Layout**:
+- Month selector (prev/next month)
+- Budget summary: total budgeted, spent, remaining
+- Budget list/cards
+- Edit/delete buttons per budget
+- Add budget button
+- Historical comparison (last 12 months)
+- View spending by category
+
+### 9.9 Analytics Page
 **Feature**: /analytics route
 
 **Layout**:
@@ -983,7 +1175,7 @@ Advanced
 - Date range selector
 - Category/account filters
 
-### 8.9 Settings Page
+### 9.10 Settings Page
 **Feature**: /settings route
 
 **Layout**:
@@ -998,7 +1190,19 @@ Advanced
 - Success/error messages
 - Confirmation dialogs for dangerous actions
 
-### 8.10 Login/Register Pages
+### 9.11 Import Page
+**Feature**: /import route (if accessible)
+
+**Layout**:
+- Step-by-step wizard:
+  1. Select file (upload CSV)
+  2. Map columns (match CSV to app fields)
+  3. Preview (show first 10 rows)
+  4. Confirm (show duplicates found, conflicts)
+  5. Import (progress bar)
+  6. Results (summary, errors)
+
+### 9.12 Login/Register Pages
 **Feature**: /login, /register routes
 
 **Login Layout**:
@@ -1065,6 +1269,7 @@ Already have account? (→ login)
 ### Cards
 - Account cards (balance, type, quick actions)
 - Transaction cards (mobile view)
+- Budget cards (limit, spent, progress)
 - Data cards (key metrics)
 
 ### Alerts & Messages

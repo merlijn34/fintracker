@@ -12,10 +12,17 @@ Family (1) ──────┬──── (N) User
                  │
                  ├──── (N) Category (hierarchical)
                  ├──── (N) Tag ──── (N) Tagging (polymorphic)
+                 ├──── (N) Merchant
+                 ├──── (N) Budget ──── (N) BudgetCategory
                  ├──── (N) Rule ──┬── (N) RuleCondition
                  │                └── (N) RuleAction
+                 ├──── (N) Import ──── (N) ImportRow
+                 │                └── (N) ImportMapping
+                 ├──── (N) PlaidItem ──── (N) PlaidAccount
+                 └──── (N) Invitation
 
 User (1) ──┬── (N) Session
+           ├── (N) Chat ──── (N) Message ──── (N) ToolCall
            └── (N) ApiKey
 
 Security (global) ──── (N) SecurityPrice
@@ -62,12 +69,19 @@ interface User {
   onboardedAt: Date | null;    // Completed onboarding
   theme: 'light' | 'dark' | 'system';
   showSidebar: boolean;
+  showAiSidebar: boolean;
+  aiEnabled: boolean;
   defaultPeriod: string;       // Default date range
   rulePromptsDisabled: boolean;
   goals: string[];             // User goals array
+  // MFA fields
+  otpSecret: string | null;    // TOTP secret (encrypted)
+  otpRequired: boolean;
+  otpBackupCodes: string[];    // Single-use backup codes
   // Email change
   unconfirmedEmail: string | null;
   // Tracking
+  lastViewedChatId: UUID | null;
   setOnboardingPreferencesAt: Date | null;
   setOnboardingGoalsAt: Date | null;
   createdAt: Date;
@@ -89,6 +103,8 @@ interface Account {
   status: 'active' | 'draft' | 'disabled' | 'pending_deletion';
   accountableType: string;     // Polymorphic type (Depository, Investment, etc.)
   accountableId: UUID;         // Polymorphic ID
+  importId: UUID | null;       // Link to import that created this
+  plaidAccountId: UUID | null; // Link to Plaid account
   lockedAttributes: JsonB;     // Fields locked from editing
   createdAt: Date;
   updatedAt: Date;
@@ -148,6 +164,8 @@ interface Entry {
   name: string;
   notes: string | null;
   excluded: boolean;           // Exclude from calculations
+  plaidId: string | null;      // External Plaid ID
+  importId: UUID | null;       // Link to import
   lockedAttributes: JsonB;
   createdAt: Date;
   updatedAt: Date;
@@ -159,6 +177,7 @@ interface Entry {
 interface Transaction {
   id: UUID;
   categoryId: UUID | null;
+  merchantId: UUID | null;
   kind: 'standard' | 'funds_movement' | 'cc_payment' | 'loan_payment' | 'one_time';
   lockedAttributes: JsonB;
   createdAt: Date;
@@ -261,6 +280,50 @@ interface Tagging {
 }
 ```
 
+### Merchant
+```typescript
+interface Merchant {
+  id: UUID;
+  familyId: UUID | null;       // null for provider merchants
+  name: string;
+  type: 'FamilyMerchant' | 'ProviderMerchant';
+  color: string | null;
+  logoUrl: string | null;
+  websiteUrl: string | null;
+  source: string | null;       // For provider merchants
+  providerMerchantId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+### Budget
+```typescript
+interface Budget {
+  id: UUID;
+  familyId: UUID;
+  startDate: Date;
+  endDate: Date;
+  budgetedSpending: Decimal | null;
+  expectedIncome: Decimal | null;
+  currency: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+// Unique constraint: (familyId, startDate, endDate)
+
+interface BudgetCategory {
+  id: UUID;
+  budgetId: UUID;
+  categoryId: UUID;
+  budgetedSpending: Decimal;
+  currency: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+// Unique constraint: (budgetId, categoryId)
+```
+
 ### Holding
 ```typescript
 interface Holding {
@@ -348,7 +411,7 @@ interface RuleCondition {
   id: UUID;
   ruleId: UUID | null;
   parentId: UUID | null;       // For nested conditions
-  conditionType: string;       // 'compound', 'name', 'amount'
+  conditionType: string;       // 'compound', 'name', 'merchant', 'amount'
   operator: string;            // 'and', 'or', 'contains', 'equals', 'gt', 'lt'
   value: string | null;
   createdAt: Date;
@@ -358,8 +421,123 @@ interface RuleCondition {
 interface RuleAction {
   id: UUID;
   ruleId: UUID;
-  actionType: string;          // 'set_category', 'add_tag'
+  actionType: string;          // 'set_category', 'set_merchant', 'add_tag'
   value: string | null;        // UUID or value
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+### Import
+```typescript
+interface Import {
+  id: UUID;
+  familyId: UUID;
+  accountId: UUID | null;      // Target account (optional)
+  type: 'TransactionImport' | 'TradeImport' | 'AccountImport' | 'MintImport';
+  status: 'pending' | 'complete' | 'importing' | 'reverting' | 'failed';
+  colSep: string;              // Column separator
+  // Column mappings
+  columnMappings: JsonB | null;
+  dateColLabel: string | null;
+  amountColLabel: string | null;
+  nameColLabel: string | null;
+  categoryColLabel: string | null;
+  tagsColLabel: string | null;
+  accountColLabel: string | null;
+  qtyColLabel: string | null;
+  tickerColLabel: string | null;
+  priceColLabel: string | null;
+  entityTypeColLabel: string | null;
+  notesColLabel: string | null;
+  currencyColLabel: string | null;
+  exchangeOperatingMicColLabel: string | null;
+  // Format settings
+  dateFormat: string;
+  numberFormat: string | null;
+  signageConvention: 'inflows_positive' | 'inflows_negative';
+  amountTypeStrategy: 'signed_amount' | 'type_column';
+  amountTypeInflowValue: string | null;
+  // Raw data
+  rawFileStr: string | null;
+  normalizedCsvStr: string | null;
+  error: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface ImportRow {
+  id: UUID;
+  importId: UUID;
+  account: string | null;
+  date: string | null;
+  qty: string | null;
+  ticker: string | null;
+  price: string | null;
+  amount: string | null;
+  currency: string | null;
+  name: string | null;
+  category: string | null;
+  tags: string | null;
+  entityType: string | null;
+  notes: string | null;
+  exchangeOperatingMic: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface ImportMapping {
+  id: UUID;
+  importId: UUID;
+  type: string;                // 'CategoryMapping', 'TagMapping', 'AccountMapping'
+  key: string | null;
+  value: string | null;
+  createWhenEmpty: boolean;
+  mappableType: string | null;
+  mappableId: UUID | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+### Plaid Integration
+```typescript
+interface PlaidItem {
+  id: UUID;
+  familyId: UUID;
+  accessToken: string;         // Encrypted
+  plaidId: string;             // Plaid item ID
+  name: string | null;         // Institution name
+  institutionId: string | null;
+  institutionUrl: string | null;
+  institutionColor: string | null;
+  plaidRegion: 'us' | 'eu';
+  status: 'good' | 'requires_update';
+  nextCursor: string | null;   // For incremental sync
+  availableProducts: string[];
+  billedProducts: string[];
+  scheduledForDeletion: boolean;
+  rawPayload: JsonB;
+  rawInstitutionPayload: JsonB;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface PlaidAccount {
+  id: UUID;
+  plaidItemId: UUID;
+  plaidId: string;             // Plaid account ID
+  plaidType: string;           // depository, credit, loan, investment
+  plaidSubtype: string | null;
+  currentBalance: Decimal | null;
+  availableBalance: Decimal | null;
+  currency: string;
+  name: string;
+  mask: string | null;         // Last 4 digits
+  rawPayload: JsonB;
+  rawTransactionsPayload: JsonB;
+  rawInvestmentsPayload: JsonB;
+  rawLiabilitiesPayload: JsonB;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -369,7 +547,7 @@ interface RuleAction {
 ```typescript
 interface Sync {
   id: UUID;
-  syncableType: string;        // 'Account', 'Family'
+  syncableType: string;        // 'Account', 'PlaidItem', 'Family'
   syncableId: UUID;
   parentId: UUID | null;       // For child syncs
   status: 'pending' | 'syncing' | 'completed' | 'failed' | 'stale';
@@ -381,6 +559,47 @@ interface Sync {
   syncingAt: Date | null;
   completedAt: Date | null;
   failedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+### Chat & AI
+```typescript
+interface Chat {
+  id: UUID;
+  userId: UUID;
+  title: string;
+  instructions: string | null;
+  error: JsonB | null;
+  latestAssistantResponseId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface Message {
+  id: UUID;
+  chatId: UUID;
+  type: 'user_message' | 'assistant_message' | 'developer_message';
+  status: 'complete' | 'streaming';
+  content: string | null;
+  aiModel: string | null;
+  providerId: string | null;
+  debug: boolean;
+  reasoning: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface ToolCall {
+  id: UUID;
+  messageId: UUID;
+  providerId: string;
+  providerCallId: string | null;
+  type: string;                // 'function'
+  functionName: string | null;
+  functionArguments: JsonB | null;
+  functionResult: JsonB | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -440,6 +659,19 @@ interface Address {
   region: string | null;
   country: string | null;
   postalCode: number | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface Invitation {
+  id: UUID;
+  familyId: UUID;
+  inviterId: UUID;
+  email: string;
+  role: 'member' | 'admin';
+  token: string;
+  expiresAt: Date;
+  acceptedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }

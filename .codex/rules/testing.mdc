@@ -1,0 +1,18 @@
+---
+description: Testing conventions for the NestJS + Nuxt monorepo.
+globs: apps/**/test/**,apps/**/tests/**,apps/**/__tests__/**
+alwaysApply: false
+---
+
+## Backend (NestJS)
+
+- Use Jest (`apps/api` scripts).
+- Prefer unit tests for services and utilities.
+- Use `@nestjs/testing` to build testing modules when needed.
+- Mock external dependencies at module boundaries.
+- Avoid integration tests unless they add clear value.
+
+## Frontend (Nuxt)
+
+- Follow any existing test runner configuration in `apps/pwa`.
+- If no frontend test setup exists, avoid introducing one unless explicitly requested.

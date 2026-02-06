@@ -1,0 +1,36 @@
+{
+  "context": "Transfers: link inflow/outflow",
+  "tasks": [
+    {
+      "id": "transfer-01",
+      "title": "Transfer entities",
+      "scope": "Define Transfer and RejectedTransfer entities per PRD.",
+      "files": [
+        "apps/api/src/entities/transfer.entity.ts",
+        "apps/api/src/entities/rejected-transfer.entity.ts"
+      ],
+      "acceptance_criteria": [
+        "Matches data model",
+        "Unique constraints documented"
+      ],
+      "dependencies": [
+        "txn-create-01"
+      ]
+    },
+    {
+      "id": "transfer-02",
+      "title": "Transfer matching service",
+      "scope": "Implement auto-match logic for transfers.",
+      "files": [
+        "apps/api/src/modules/transfers/*"
+      ],
+      "acceptance_criteria": [
+        "Matches rules from PRD",
+        "Creates Transfer records"
+      ],
+      "dependencies": [
+        "transfer-01"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "context": "Categories: list/create/edit",
+  "tasks": [
+    {
+      "id": "cat-01",
+      "title": "Category entity + endpoints",
+      "scope": "Define Category entity and CRUD endpoints.",
+      "files": [
+        "apps/api/src/entities/category.entity.ts",
+        "apps/api/src/modules/categories/*"
+      ],
+      "acceptance_criteria": [
+        "Endpoints match API contract",
+        "Supports hierarchical categories"
+      ],
+      "dependencies": [
+        "auth-01"
+      ]
+    },
+    {
+      "id": "cat-02",
+      "title": "Categories UI",
+      "scope": "List/create/edit categories UI.",
+      "files": [
+        "apps/pwa/pages/categories/index.vue"
+      ],
+      "acceptance_criteria": [
+        "CRUD via API",
+        "Color + icon fields editable"
+      ],
+      "dependencies": [
+        "cat-01"
+      ]
+    }
+  ]
+}

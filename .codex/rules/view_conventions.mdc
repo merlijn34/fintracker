@@ -1,0 +1,32 @@
+---
+description: Conventions for Nuxt pages and Vue components.
+globs: apps/pwa/pages/**,apps/pwa/components/**
+alwaysApply: false
+---
+
+## Page vs Component
+
+- **Pages** (`apps/pwa/pages`) should be route-level containers that compose components.
+- **Components** (`apps/pwa/components`) should be reusable and focused.
+- If UI is used in more than one page, extract to a component.
+
+## Template Rules
+
+- Keep templates simple; move logic to `<script setup>` and computed properties.
+- Avoid complex inline expressions in templates.
+
+## Example
+
+```vue
+<script setup lang="ts">
+const props = defineProps<{ title: string }>()
+const subtitle = computed(() => `${props.title} summary`)
+</script>
+
+<template>
+  <section class="space-y-2">
+    <h1 class="text-xl font-semibold">{{ props.title }}</h1>
+    <p class="text-muted-foreground">{{ subtitle }}</p>
+  </section>
+</template>
+```

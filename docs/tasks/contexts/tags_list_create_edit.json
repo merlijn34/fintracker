@@ -1,0 +1,34 @@
+{
+  "context": "Tags: list/create/edit",
+  "tasks": [
+    {
+      "id": "tag-01",
+      "title": "Tag entity + endpoints",
+      "scope": "Define Tag entity and CRUD endpoints.",
+      "files": [
+        "apps/api/src/entities/tag.entity.ts",
+        "apps/api/src/modules/tags/*"
+      ],
+      "acceptance_criteria": [
+        "Endpoints match API contract"
+      ],
+      "dependencies": [
+        "auth-01"
+      ]
+    },
+    {
+      "id": "tag-02",
+      "title": "Tags UI",
+      "scope": "List/create/edit tags UI.",
+      "files": [
+        "apps/pwa/pages/tags/index.vue"
+      ],
+      "acceptance_criteria": [
+        "CRUD via API"
+      ],
+      "dependencies": [
+        "tag-01"
+      ]
+    }
+  ]
+}

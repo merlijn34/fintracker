@@ -1,0 +1,28 @@
+---
+description: Architecture and data flow overview for the NestJS + Nuxt monorepo.
+globs: apps/**,docs/prd/**
+alwaysApply: true
+---
+
+This project is a TypeScript monorepo with a NestJS API and a Nuxt PWA frontend.
+
+## Structure
+
+- `apps/api`: NestJS backend
+  - `src/modules`: feature modules with controllers, services, and DTOs
+  - `src/entities`: TypeORM entities
+  - `src/common`: shared utilities, guards, interceptors
+- `apps/pwa`: Nuxt 4 frontend
+  - `pages`: route-level views
+  - `components`: reusable UI components
+  - `composables`: shared logic via Composition API
+  - `stores`: Pinia state (if present)
+  - `assets/css/tailwind.css`: Tailwind entrypoint
+
+## Source of Truth
+
+- Product scope and domain definitions live in the PRD:
+  - [04_DATA_MODEL.md](mdc:docs/prd/04_DATA_MODEL.md)
+  - [05_API_CONTRACTS.md](mdc:docs/prd/05_API_CONTRACTS.md)
+
+When unsure about domain behavior or API shapes, consult the PRD first.

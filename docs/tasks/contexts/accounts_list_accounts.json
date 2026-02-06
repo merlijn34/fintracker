@@ -1,0 +1,35 @@
+{
+  "context": "Accounts: list accounts",
+  "tasks": [
+    {
+      "id": "acct-list-01",
+      "title": "List accounts endpoint",
+      "scope": "GET /api/v1/accounts with filtering.",
+      "files": [
+        "apps/api/src/modules/accounts/*"
+      ],
+      "acceptance_criteria": [
+        "Filters per API contract",
+        "Includes balances and account types"
+      ],
+      "dependencies": [
+        "acct-create-01"
+      ]
+    },
+    {
+      "id": "acct-list-02",
+      "title": "Accounts list UI",
+      "scope": "Accounts list page with filters and summary.",
+      "files": [
+        "apps/pwa/pages/accounts/index.vue"
+      ],
+      "acceptance_criteria": [
+        "Renders list from API",
+        "Supports basic filter/sort UI"
+      ],
+      "dependencies": [
+        "acct-list-01"
+      ]
+    }
+  ]
+}

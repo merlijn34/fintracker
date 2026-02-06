@@ -1,0 +1,22 @@
+---
+description: Vue and composable conventions for the Nuxt PWA.
+globs: apps/pwa/**
+alwaysApply: false
+---
+
+## Vue Component Conventions
+
+- Prefer `<script setup lang="ts">`.
+- Use `defineProps` and `defineEmits` with explicit types.
+- Use `ref` for state, `computed` for derived values.
+- Avoid direct DOM manipulation; use Vue bindings and refs.
+
+## Composables
+
+- Name composables with `use*` and place them in `apps/pwa/composables`.
+- Keep composables focused on one responsibility.
+
+## State Management
+
+- Use Pinia stores for shared state (if a store already exists for the domain).
+- Avoid global state when component-local state suffices.

@@ -7,10 +7,9 @@
 **Objective**: Basic account management and transaction tracking
 
 **Backend Tasks**:
-
 - [ ] Project setup (NestJS, Prisma, PostgreSQL)
-- [ ] Database schema migration
-- [ ] Auth module (JWT, sessions)
+- [ ] Database schema migration from Rails
+- [ ] Auth module (JWT, sessions, MFA)
 - [ ] Users module with profile management
 - [ ] Families module with settings
 - [ ] Accounts module (all 10 types)
@@ -22,7 +21,6 @@
 - [ ] API rate limiting
 
 **Frontend Tasks**:
-
 - [ ] Project setup (Nuxt, Tailwind, Pinia)
 - [ ] Design system components (port from Rails)
 - [ ] Auth pages (login, register, password reset)
@@ -37,13 +35,11 @@
 - [ ] Settings pages (profile, preferences, security)
 
 **Infrastructure**:
-
 - [ ] Docker Compose configuration
 - [ ] Environment variable management
 - [ ] Basic CI pipeline (lint, test)
 
 **Deliverables**:
-
 - Working login/registration
 - Manual account creation for all types
 - Transaction management with categories/tags
@@ -53,33 +49,37 @@
 
 ### Phase 2: Advanced Financial Features
 
-**Objective**: Investment tracking and transfers
+**Objective**: Investment tracking, budgets, and import system
 
 **Backend Tasks**:
-
 - [ ] Holdings module
 - [ ] Securities module with price tracking
 - [ ] Trades module
 - [ ] Valuations module
 - [ ] Transfers module with matching algorithm
+- [ ] Budgets module with category allocations
+- [ ] Import module (all types)
 - [ ] Background jobs with BullMQ
 - [ ] Sync module with state machine
 - [ ] Exchange rates module
 - [ ] Multi-currency conversion
 
 **Frontend Tasks**:
-
 - [ ] Holdings list and portfolio view
 - [ ] Trade entry forms
 - [ ] Investment account detail view
+- [ ] Budget management pages
+- [ ] Budget donut chart (D3.js)
+- [ ] Import wizard (multi-step)
 - [ ] Transfer management
-- [ ] Time series charts (shadcn-vue charts)
+- [ ] Time series charts (D3.js)
 - [ ] Sparkline components
 - [ ] Real-time sync status (WebSocket)
 
 **Deliverables**:
-
 - Full investment tracking
+- Monthly budgeting
+- CSV import capability
 - Transfer detection and management
 - Multi-currency support
 
@@ -90,18 +90,26 @@
 **Objective**: External service integrations and automation
 
 **Backend Tasks**:
-
+- [ ] Plaid integration module
+- [ ] Plaid webhook handling
 - [ ] Rules engine module
+- [ ] AI chat module with OpenAI
+- [ ] Function calling implementation
 - [ ] Synth API integration for market data
 - [ ] Data export module
 
 **Frontend Tasks**:
-
+- [ ] Plaid Link integration
+- [ ] Bank connection management
+- [ ] Connection status indicators
 - [ ] Rules builder UI
+- [ ] AI chat sidebar
+- [ ] Chat conversation view
 - [ ] Data export UI
 
 **Deliverables**:
-
+- Automatic bank syncing via Plaid
+- AI financial assistant
 - Automated transaction rules
 - Market data for investments
 - Full data export
@@ -113,7 +121,6 @@
 **Objective**: Performance, stability, and production readiness
 
 **Backend Tasks**:
-
 - [ ] Query optimization
 - [ ] Redis caching layer
 - [ ] API documentation (OpenAPI)
@@ -122,7 +129,6 @@
 - [ ] Load testing
 
 **Frontend Tasks**:
-
 - [ ] Performance optimization
 - [ ] Code splitting and lazy loading
 - [ ] Accessibility audit and fixes
@@ -132,14 +138,12 @@
 - [ ] Empty state designs
 
 **Infrastructure**:
-
 - [ ] Production deployment config
 - [ ] Monitoring setup (Sentry)
 - [ ] Backup configuration
 - [ ] Documentation
 
 **Deliverables**:
-
 - Production-ready application
 - Full documentation
 - Monitoring and alerting
@@ -154,16 +158,20 @@ Phase 1 (Foundation)
 ├── Auth (blocks everything)
 ├── Users & Families (blocks accounts)
 ├── Accounts (blocks transactions)
-├── Transactions (blocks rules)
+├── Transactions (blocks budgets, imports)
 └── Categories & Tags (blocks transactions)
 
 Phase 2 (Advanced)
 ├── Holdings & Securities (independent)
+├── Budgets (depends on categories)
+├── Imports (depends on transactions)
 ├── Transfers (depends on transactions)
 └── Sync System (depends on accounts)
 
 Phase 3 (Integrations)
+├── Plaid (depends on accounts, sync)
 ├── Rules (depends on transactions)
+├── AI Chat (depends on all data modules)
 └── Market Data (depends on securities)
 
 Phase 4 (Polish)
@@ -172,26 +180,24 @@ Phase 4 (Polish)
 
 ## Relative Effort Estimates
 
-| Phase                 | Backend | Frontend | Total   |
-| --------------------- | ------- | -------- | ------- |
-| Phase 1: Foundation   | Large   | Large    | X-Large |
-| Phase 2: Advanced     | Large   | Medium   | Large   |
-| Phase 3: Integrations | Medium  | Small    | Medium  |
-| Phase 4: Polish       | Small   | Medium   | Medium  |
+| Phase | Backend | Frontend | Total |
+|-------|---------|----------|-------|
+| Phase 1: Foundation | Large | Large | X-Large |
+| Phase 2: Advanced | Large | Medium | Large |
+| Phase 3: Integrations | Medium | Small | Medium |
+| Phase 4: Polish | Small | Medium | Medium |
 
 ## Testing Strategy
 
 ### Unit Tests
 
 **Backend**:
-
 - Service methods
 - Utility functions
 - Validation logic
 - Data transformations
 
 **Frontend**:
-
 - Composables
 - Store actions/getters
 - Utility functions
@@ -200,14 +206,12 @@ Phase 4 (Polish)
 ### Integration Tests
 
 **Backend**:
-
 - API endpoint tests
 - Database operations
-- External API mocks (Synth)
+- External API mocks (Plaid, OpenAI)
 - Job processors
 
 **Frontend**:
-
 - Component rendering
 - User interactions
 - API integration (mock)
@@ -215,24 +219,25 @@ Phase 4 (Polish)
 ### End-to-End Tests
 
 **Critical Flows**:
-
 - User registration and login
 - Account creation
 - Transaction CRUD
-- Rules management
+- Import wizard
+- Plaid connection (sandbox)
+- Budget management
 
 **Tools**:
-
 - Playwright or Cypress for E2E
 - MSW for API mocking
+- Plaid sandbox for integration
 
 ### Test Coverage Goals
 
-| Type        | Backend             | Frontend            |
-| ----------- | ------------------- | ------------------- |
-| Unit        | 80%                 | 70%                 |
-| Integration | 60%                 | 50%                 |
-| E2E         | Critical flows only | Critical flows only |
+| Type | Backend | Frontend |
+|------|---------|----------|
+| Unit | 80% | 70% |
+| Integration | 60% | 50% |
+| E2E | Critical flows only | Critical flows only |
 
 ---
 
@@ -243,7 +248,7 @@ This PRD provides comprehensive documentation for rebuilding the Maybe personal 
 1. **59 database tables** mapped to Prisma schema
 2. **250+ routes** translated to NestJS endpoints
 3. **22 ViewComponents** to port to Vue
-4. **2 external integrations** (Synth, Stripe)
+4. **4 external integrations** (Plaid, OpenAI, Synth, Stripe)
 5. **4 implementation phases** from MVP to production
 
 The rebuild maintains full feature parity while modernizing the stack to Vue 3/Nuxt + NestJS.

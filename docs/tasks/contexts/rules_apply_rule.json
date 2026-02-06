@@ -1,0 +1,37 @@
+{
+  "context": "Rules: apply rule",
+  "tasks": [
+    {
+      "id": "rule-apply-01",
+      "title": "Rule application job",
+      "scope": "Background job to apply rules to transactions.",
+      "files": [
+        "apps/api/src/modules/rules/*",
+        "apps/api/src/jobs/*"
+      ],
+      "acceptance_criteria": [
+        "Applies actions to matching transactions",
+        "Logs applied count"
+      ],
+      "dependencies": [
+        "rule-02",
+        "txn-create-01"
+      ]
+    },
+    {
+      "id": "rule-apply-02",
+      "title": "Rule apply UI action",
+      "scope": "UI control to apply rule and show result.",
+      "files": [
+        "apps/pwa/pages/rules/index.vue"
+      ],
+      "acceptance_criteria": [
+        "Triggers apply endpoint",
+        "Shows confirmation + result"
+      ],
+      "dependencies": [
+        "rule-apply-01"
+      ]
+    }
+  ]
+}

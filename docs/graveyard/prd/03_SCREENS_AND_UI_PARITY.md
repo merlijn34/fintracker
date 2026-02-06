@@ -10,6 +10,8 @@
 | `/register` | Register | New user signup |
 | `/password_resets/new` | Forgot Password | Request password reset email |
 | `/password_resets/:token/edit` | Reset Password | Set new password |
+| `/mfa/verify` | MFA Verification | Enter TOTP code |
+| `/invitations/:token/accept` | Accept Invitation | Join family via invite |
 
 ### Main Application (Authenticated)
 
@@ -30,19 +32,28 @@
 | `/other_liabilities/new` | New Other Liability | Generic liability form |
 | `/transactions` | Transaction List | Searchable/filterable list |
 | `/transactions/new` | New Transaction | Transaction form modal |
+| `/budgets` | Budgets (redirect) | Redirects to current month |
+| `/budgets/:month_year` | Budget Detail | Monthly budget with donut chart |
 | `/holdings` | Holdings List | Investment positions |
 | `/trades/new` | New Trade | Buy/sell form |
+| `/imports` | Import History | List of past imports |
+| `/imports/new` | New Import | Upload CSV |
+| `/imports/:id/*` | Import Wizard | Multi-step import flow |
 | `/rules` | Rules List | Automation rules |
 | `/rules/new` | New Rule | Rule builder |
 | `/categories` | Categories | Category management |
 | `/tags` | Tags | Tag management |
+| `/family_merchants` | Merchants | Merchant management |
+| `/chats` | Chat List | AI conversations |
+| `/chats/:id` | Chat Detail | Conversation view |
 | `/settings/profile` | Profile Settings | Name, email, image |
 | `/settings/preferences` | Preferences | Theme, display options |
-| `/settings/security` | Security | Password |
+| `/settings/security` | Security | Password, MFA |
 | `/settings/billing` | Billing | Subscription (optional) |
 | `/settings/hosting` | Hosting | Self-hosted config |
 | `/settings/api_key` | API Keys | API key management |
 | `/onboarding/*` | Onboarding | Welcome flow |
+| `/plaid_items/new` | Connect Bank | Plaid Link |
 
 ---
 
@@ -57,7 +68,7 @@
 2. **Net Worth Card**:
    - Large number display
    - Trend indicator (up/down arrow with percentage)
-   - Time series chart (shadcn-vue charts)
+   - Time series chart (D3.js line chart with gradient fill)
 3. **Balance Sheet Cards** (2-column grid):
    - Assets card: Total, grouped by account type
    - Liabilities card: Total, grouped by account type
@@ -186,6 +197,78 @@
 
 ---
 
+### Budget Detail (`/budgets/:month_year`)
+
+**Layout**: Full width content
+
+**Sections**:
+1. **Header**: Month/year with prev/next arrows, period picker
+2. **Income Card**: Expected vs actual income
+3. **Spending Card**:
+   - Donut chart visualization
+   - Legend with category colors
+4. **Category List**:
+   - Category row: Name, budgeted, actual, available
+   - Progress bar showing usage
+   - Overage highlighted in red
+
+**Components**:
+- `DonutChart`: D3.js ring chart with segments
+- `BudgetCategoryRow`: Inline editable budget amount
+
+**States**:
+- Loading: Skeleton chart and rows
+- Empty: "Set up your budget categories"
+- Over budget: Red highlight on affected categories
+
+**UI Parity Checklist**:
+- [ ] Donut chart has hover interaction (shows category detail)
+- [ ] Category rows have progress bar
+- [ ] "Over budget" badge on exceeded categories
+- [ ] Month picker is modal
+
+---
+
+### Import Wizard (`/imports/:id/*`)
+
+**Multi-step flow**:
+
+**Step 1: Upload** (`/imports/:id/upload`)
+- File drop zone
+- CSV preview (first 5 rows)
+- Column separator select
+
+**Step 2: Configuration** (`/imports/:id/configuration`)
+- Column mapping grid
+- Date format select
+- Number format select
+- Signage convention toggle
+
+**Step 3: Clean** (`/imports/:id/clean`)
+- Data table with all rows
+- Invalid rows highlighted
+- Edit cells inline
+- Delete row button
+
+**Step 4: Confirm** (`/imports/:id/confirm`)
+- Summary statistics
+- Duplicate warnings
+- Confirm button
+
+**States**:
+- Step indicator showing progress
+- Back button to previous step
+- Cancel to abandon import
+
+**UI Parity Checklist**:
+- [ ] Step indicator at top
+- [ ] File drop zone has drag state
+- [ ] Preview table scrolls horizontally
+- [ ] Invalid cells have red border
+- [ ] Summary shows counts by type
+
+---
+
 ## Reusable UI Components
 
 We use **shadcn-nuxt** components in the PWA, generated into `apps/pwa/components/ui` (style: **new-york**). The Nuxt module is configured with:
@@ -248,8 +331,9 @@ These remain app-specific, but should be composed from the primitives above:
 5. `TrendIndicator` — Up/down arrow + percentage formatting
 6. `DatePicker` — Date input UX (requires adding a calendar primitive when implemented)
 7. `TimeSeriesChart` — Chart container + tooltip/crosshair helpers + loading/empty states
-8. `SankeyChart` — Cashflow visualization + hover states
-9. `Sparkline` — Mini chart for account rows/cards
+8. `DonutChart` — Budget ring chart + tooltip/legend
+9. `SankeyChart` — Cashflow visualization + hover states
+10. `Sparkline` — Mini chart for account rows/cards
 
 ### Form Components (custom, built on shadcn + vee-validate)
 
@@ -257,6 +341,7 @@ Prefer composing form UI using `@/components/ui/form` building blocks plus primi
 
 1. `MoneyInput` — Currency-formatted numeric input (wraps `Input`)
 2. `CategorySelect` — Hierarchical selection UI (will need a combobox/select primitive when implemented)
-3. `TagSelect` — Multi-select tags UI (will need a multi-select primitive/pattern when implemented)
-4. `AccountSelect` — Account dropdown/select (will need a select primitive when implemented)
-5. `DateRangeSelect` — Start/end date picker (will need a calendar/date-range primitive when implemented)
+3. `MerchantSelect` — Searchable combobox with “create” option (will need a combobox primitive when implemented)
+4. `TagSelect` — Multi-select tags UI (will need a multi-select primitive/pattern when implemented)
+5. `AccountSelect` — Account dropdown/select (will need a select primitive when implemented)
+6. `DateRangeSelect` — Start/end date picker (will need a calendar/date-range primitive when implemented)

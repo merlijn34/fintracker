@@ -1,0 +1,23 @@
+---
+description: Baseline rules for working in this monorepo.
+globs: *
+alwaysApply: true
+---
+
+# General Rules
+
+- Before generating code, read the project rules that apply:
+  - [project-design.mdc](mdc:.cursor/rules/project-design.mdc) for architecture context
+  - [project-conventions.mdc](mdc:.cursor/rules/project-conventions.mdc) for coding conventions
+  - [ui-ux-design-guidelines.mdc](mdc:.cursor/rules/ui-ux-design-guidelines.mdc) for frontend styling
+  - [view_conventions.mdc](mdc:.cursor/rules/view_conventions.mdc) and [vue_conventions.mdc](mdc:.cursor/rules/vue_conventions.mdc) for Vue/Nuxt usage
+  - [testing.mdc](mdc:.cursor/rules/testing.mdc) when writing tests
+
+- Hardcode strings in English for now; do not introduce i18n scaffolding.
+- Prefer existing patterns and utilities over introducing new dependencies.
+
+## Prohibited Actions
+
+- Do not run dev servers (`pnpm dev`, `nest start`, `nuxt dev`) unless explicitly asked.
+- Do not run database migrations or schema sync unless explicitly asked.
+- Do not change production configuration or secrets.

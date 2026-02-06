@@ -1,0 +1,24 @@
+---
+description: UI/UX rules for the Nuxt PWA.
+globs: apps/pwa/**
+alwaysApply: true
+---
+
+Use these rules when writing frontend UI code.
+
+## Styling
+
+- Tailwind CSS is the default; prefer utility classes over custom CSS.
+- Consult `apps/pwa/tailwind.config.js` and `apps/pwa/assets/css/tailwind.css` for tokens and base styles before adding new patterns.
+- Prefer shadcn-nuxt components for base UI; extend with Tailwind utilities.
+- Keep layouts responsive and mobile-friendly.
+
+## Components
+
+- Use semantic HTML in Vue templates.
+- Keep components small and focused.
+- Avoid inline styles; use Tailwind classes instead.
+
+## Charts
+
+- Use shadcn-vue charts (via shadcn-nuxt) instead of D3/Unovis.

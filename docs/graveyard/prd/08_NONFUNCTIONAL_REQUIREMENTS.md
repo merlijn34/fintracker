@@ -79,7 +79,9 @@
 
 2. **Business Metrics**
    - Accounts created per day
-   - Transactions created per day
+   - Transactions imported per day
+   - Plaid connections per day
+   - AI chat messages per day
 
 3. **Infrastructure Metrics**
    - CPU/memory usage
@@ -167,7 +169,7 @@
 ```html
 <!-- Standard -->
 <title>Maybe - Personal Finance</title>
-<meta name="description" content="Track your finances and investments">
+<meta name="description" content="Track your finances, budget, and investments">
 
 <!-- Open Graph -->
 <meta property="og:title" content="Maybe - Personal Finance">

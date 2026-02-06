@@ -1,0 +1,35 @@
+{
+  "context": "Accounts: account detail",
+  "tasks": [
+    {
+      "id": "acct-detail-01",
+      "title": "Get account endpoint",
+      "scope": "GET /api/v1/accounts/:id",
+      "files": [
+        "apps/api/src/modules/accounts/*"
+      ],
+      "acceptance_criteria": [
+        "Response includes account + accountable",
+        "Matches API contract"
+      ],
+      "dependencies": [
+        "acct-create-01"
+      ]
+    },
+    {
+      "id": "acct-detail-02",
+      "title": "Account detail UI",
+      "scope": "Account detail page with account info + recent transactions.",
+      "files": [
+        "apps/pwa/pages/accounts/[id].vue"
+      ],
+      "acceptance_criteria": [
+        "Fetches account detail",
+        "Shows recent transactions list"
+      ],
+      "dependencies": [
+        "acct-detail-01"
+      ]
+    }
+  ]
+}

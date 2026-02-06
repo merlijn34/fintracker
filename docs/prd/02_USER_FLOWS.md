@@ -16,12 +16,6 @@
    - Session record
 5. User redirected to /onboarding
 
-<!-- Alternate: Registration with invitation
-1. User clicks invitation link (/invitations/:token/accept)
-2. System validates token not expired (3 days)
-3. User enters password
-4. System creates user in inviter's family
-5. User redirected to onboarding -->
 ```
 
 ### 2. Login Flow
@@ -62,32 +56,7 @@ Error states:
 Empty state: Show "No accounts yet" with prominent add button
 ```
 
-### 4. Connect Bank Account (Plaid) Flow
-
-```
-1. User clicks "Connect Bank" button
-2. System requests link_token from Plaid API
-3. Plaid Link modal opens (external SDK)
-4. User selects institution, enters credentials
-5. User selects accounts to link
-6. Plaid returns public_token
-7. System exchanges for access_token (stored encrypted)
-8. System creates:
-   - PlaidItem record
-   - PlaidAccount records for each selected account
-   - Account records linked to PlaidAccounts
-9. System queues initial SyncJob
-10. User sees "Syncing..." status
-11. Webhook or polling detects sync complete
-12. Accounts appear with transactions
-
-Error states:
-- User cancels Plaid: Close modal, no changes
-- Institution requires update: Store status="requires_update", show re-auth prompt
-- Sync fails: Show error, allow retry
-```
-
-### 5. Transaction List & Filter Flow
+### 4. Transaction List & Filter Flow
 
 ```
 1. User navigates to /transactions
@@ -97,7 +66,7 @@ Error states:
 3. Transaction list displays with:
    - Date grouped sections
    - Amount (formatted with currency)
-   - Name/merchant
+   - Description
    - Category pill
    - Account name
 4. User applies filters:
@@ -116,17 +85,16 @@ Bulk operations:
 5. Confirm -> all selected transactions updated
 ```
 
-### 6. Create/Edit Transaction Flow
+### 5. Create/Edit Transaction Flow
 
 ```
 1. User clicks "Add Transaction" or clicks existing row
 2. Modal opens with form:
    - Account (select)
    - Date (date picker)
-   - Name (text input)
+   - Description (text input)
    - Amount (money input)
    - Category (searchable select with hierarchy)
-   - Merchant (combobox with create option)
    - Tags (multi-select with create option)
    - Kind (dropdown: standard, one-time, etc.)
    - Notes (textarea)
@@ -135,7 +103,7 @@ Bulk operations:
    - Account required
    - Date required
    - Amount required (non-zero)
-   - Name required
+   - Description required
 5. System creates/updates:
    - Entry record
    - Transaction record (entryable)
@@ -143,112 +111,21 @@ Bulk operations:
 7. Account balance recalculated (background)
 8. Transaction list refreshes
 
-Edit specific:
-- If transaction has locked_attributes (from Plaid), those fields are disabled
 ```
 
-### 7. Budget Management Flow
-
-```
-1. User navigates to /budgets (redirects to current month)
-2. System creates Budget record if not exists
-3. Page displays:
-   - Header with month navigation
-   - Income section: expected vs actual
-   - Donut chart of spending by category
-   - Category rows: budgeted, actual, available
-4. User clicks category row
-5. Inline edit or modal for budgeted amount
-6. User saves
-7. Donut chart and totals update
-8. Overage categories highlighted in red
-
-Empty state: "Set up your first budget" with category suggestions
-```
-
-### 8. Import CSV Flow
-
-```
-Step 1: Upload
-1. User navigates to /imports/new
-2. User selects import type (Transaction, Trade, Account, Mint)
-3. User uploads CSV file
-4. System parses CSV, creates Import and ImportRow records
-5. Redirect to configuration step
-
-Step 2: Configuration
-1. User sees column mapping interface
-2. System auto-maps common headers (Date, Amount, Description)
-3. User adjusts mappings via dropdowns
-4. User sets:
-   - Date format (from presets)
-   - Number format
-   - Signage convention
-5. User clicks "Continue"
-
-Step 3: Clean/Review
-1. System displays parsed rows in table
-2. Invalid rows highlighted
-3. User can edit individual rows
-4. User can delete rows
-5. User clicks "Continue"
-
-Step 4: Confirm
-1. System shows summary:
-   - Total rows to import
-   - New categories/tags to create
-   - Potential duplicates flagged
-2. User confirms
-3. System queues ImportJob
-4. User sees progress indicator
-5. Redirect to transactions page on complete
-
-Revert flow:
-1. User navigates to /imports
-2. User finds import, clicks "Revert"
-3. Confirm dialog
-4. System queues RevertImportJob
-5. All entries with import_id deleted
-```
-
-### 9. AI Chat Flow
-
-```
-1. User opens AI sidebar (right sidebar)
-2. User types question (e.g., "What did I spend on food last month?")
-3. User presses send
-4. System creates:
-   - Chat record (if new conversation)
-   - Message record (type: user_message)
-5. System queues CreateChatResponseJob
-6. Job sends to OpenAI with function definitions
-7. If OpenAI requests function call:
-   a. System executes function (e.g., get_transactions)
-   b. Returns result to OpenAI
-   c. OpenAI generates final response
-8. Response streams to UI
-9. Message record created (type: assistant_message)
-10. UI updates with formatted response
-
-Error handling:
-- API error: Show retry button
-- Rate limit: Show "Try again later"
-- No API key configured: Show setup prompt
-```
-
-### 10. Rules Engine Flow
+### 6. Rules Engine Flow
 
 ```
 Create rule:
 1. User navigates to /rules/new
 2. User defines conditions:
    - Click "Add condition"
-   - Select field (name, merchant, amount)
+   - Select field (name, amount)
    - Select operator (contains, equals, greater than)
    - Enter value
    - Add more conditions with AND/OR
 3. User defines actions:
-   - Select action type (set_category, add_tags, set_merchant)
+   - Select action type (set_category, add_tags)
    - Select target value
 4. User saves rule
 5. System shows preview: "This rule will affect X transactions"
@@ -261,7 +138,7 @@ Apply rule:
 5. Success notification
 
 Auto-apply:
-- When new transactions sync or import
+- When new transactions are created
 - System evaluates active rules
 - Matching transactions get rule actions applied
 ```

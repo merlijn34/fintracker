@@ -22,14 +22,14 @@ This directory contains the comprehensive PRD for rebuilding the Maybe personal 
 - **59** database tables
 - **250+** routes/endpoints
 - **22** UI components to port
-- **2** external integrations (Synth, Stripe)
+- **4** external integrations (Plaid, OpenAI, Synth, Stripe)
 - **4** implementation phases
 
 ## Target Stack
 
 | Layer | Technology |
 |-------|------------|
-| Frontend | Vue 3, Nuxt 3, Tailwind CSS, Pinia, shadcn-vue charts |
+| Frontend | Vue 3, Nuxt 3, Tailwind CSS, Pinia, D3.js |
 | Backend | NestJS, Prisma, PostgreSQL |
 | Background Jobs | BullMQ, Redis |
 | Authentication | JWT with refresh tokens |

@@ -1,0 +1,330 @@
+{
+  "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md",
+  "tasks": [
+    {
+      "title": "Project setup (NestJS, Prisma, PostgreSQL)",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Database schema migration",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Auth module (JWT, sessions)",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Users module with profile management",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Families module with settings",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Accounts module (all 10 types)",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Entries module (base)",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Transactions module with CRUD",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Categories module with hierarchy",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Tags module with polymorphic tagging",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Balance calculation service",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "API rate limiting",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Project setup (Nuxt, Tailwind, Pinia)",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Design system components (port from Rails)",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Auth pages (login, register, password reset)",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Layout components (sidebar, header)",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Dashboard page with basic balance sheet",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Accounts list page",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Account detail page with activity feed",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Transaction list with filters",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Transaction CRUD forms",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Categories management",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Tags management",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Settings pages (profile, preferences, security)",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Docker Compose configuration",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Environment variable management",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Basic CI pipeline (lint, test)",
+      "section": "Phase 1: Foundation (MVP Core)",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Holdings module",
+      "section": "Phase 2: Advanced Financial Features",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Securities module with price tracking",
+      "section": "Phase 2: Advanced Financial Features",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Trades module",
+      "section": "Phase 2: Advanced Financial Features",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Valuations module",
+      "section": "Phase 2: Advanced Financial Features",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Transfers module with matching algorithm",
+      "section": "Phase 2: Advanced Financial Features",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Background jobs with BullMQ",
+      "section": "Phase 2: Advanced Financial Features",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Sync module with state machine",
+      "section": "Phase 2: Advanced Financial Features",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Exchange rates module",
+      "section": "Phase 2: Advanced Financial Features",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Multi-currency conversion",
+      "section": "Phase 2: Advanced Financial Features",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Holdings list and portfolio view",
+      "section": "Phase 2: Advanced Financial Features",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Trade entry forms",
+      "section": "Phase 2: Advanced Financial Features",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Investment account detail view",
+      "section": "Phase 2: Advanced Financial Features",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Transfer management",
+      "section": "Phase 2: Advanced Financial Features",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Time series charts (shadcn-vue charts)",
+      "section": "Phase 2: Advanced Financial Features",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Sparkline components",
+      "section": "Phase 2: Advanced Financial Features",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Real-time sync status (WebSocket)",
+      "section": "Phase 2: Advanced Financial Features",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Rules engine module",
+      "section": "Phase 3: Integrations",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Synth API integration for market data",
+      "section": "Phase 3: Integrations",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Data export module",
+      "section": "Phase 3: Integrations",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Rules builder UI",
+      "section": "Phase 3: Integrations",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Data export UI",
+      "section": "Phase 3: Integrations",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Query optimization",
+      "section": "Phase 4: Polish and Production",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Redis caching layer",
+      "section": "Phase 4: Polish and Production",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "API documentation (OpenAPI)",
+      "section": "Phase 4: Polish and Production",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Comprehensive error handling",
+      "section": "Phase 4: Polish and Production",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Security audit",
+      "section": "Phase 4: Polish and Production",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Load testing",
+      "section": "Phase 4: Polish and Production",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Performance optimization",
+      "section": "Phase 4: Polish and Production",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Code splitting and lazy loading",
+      "section": "Phase 4: Polish and Production",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Accessibility audit and fixes",
+      "section": "Phase 4: Polish and Production",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Mobile responsiveness polish",
+      "section": "Phase 4: Polish and Production",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Error boundaries",
+      "section": "Phase 4: Polish and Production",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Loading state polish",
+      "section": "Phase 4: Polish and Production",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Empty state designs",
+      "section": "Phase 4: Polish and Production",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Production deployment config",
+      "section": "Phase 4: Polish and Production",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Monitoring setup (Sentry)",
+      "section": "Phase 4: Polish and Production",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Backup configuration",
+      "section": "Phase 4: Polish and Production",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    },
+    {
+      "title": "Documentation",
+      "section": "Phase 4: Polish and Production",
+      "source": "docs/prd/09_MILESTONES_AND_BUILD_PLAN.md"
+    }
+  ]
+}

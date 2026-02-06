@@ -13,6 +13,16 @@
 | User profile update | P0 | Name, profile image | Image variants: 40x40, 80x80, 200x200 |
 | Theme preference | P0 | Light/dark/system theme toggle | Persists to user record |
 
+<!-- ### 2. Family & Household Management
+
+| Feature | Priority | Description | Notes/Edge Cases |
+|---------|----------|-------------|------------------|
+| Family settings | P0 | Currency, locale, date format, timezone | 9 date format options |
+| Family member roles | P1 | member, admin, super_admin | Admin can invite, super_admin for impersonation |
+| Family invitations | P1 | Email-based invites with 3-day expiry | Unique token, role assignment |
+| Invite codes | P2 | Require invite code for signup | Site-level setting |
+| Data isolation | P0 | All data scoped to family | Critical security requirement | -->
+
 ### 3. Account Management
 
 | Feature | Priority | Description | Notes/Edge Cases |
@@ -35,15 +45,16 @@
 | Bulk sync all | P1 | Sync all accounts at once | Background job |
 | Account toggle active/disable | P1 | Enable/disable without deleting | Excluded from calculations |
 | Balance reconciliation | P1 | Adjust balance with valuation | Creates Valuation entry |
-| Sparkline chart | P0 | Mini balance chart for list | shadcn-vue charts, 30-day default |
+| Sparkline chart | P0 | Mini balance chart for list | D3.js, 30-day default |
 
 ### 4. Transaction Management
 
 | Feature | Priority | Description | Notes/Edge Cases |
 |---------|----------|-------------|------------------|
 | Transaction CRUD | P0 | Create, read, update, delete | Via Entry model |
-| Transaction kinds | P0 | standard, funds_movement, cc_payment, loan_payment, one_time | Consistent classification for reporting |
+| Transaction kinds | P0 | standard, funds_movement, cc_payment, loan_payment, one_time | Affects budget inclusion |
 | Category assignment | P0 | Single category per transaction | Hierarchical categories |
+| Merchant assignment | P0 | Single merchant per transaction | Family or provider merchant |
 | Tag assignment | P0 | Multiple tags per transaction | Polymorphic taggings |
 | Transaction search | P0 | Full-text search on name | Lowercase index |
 | Date range filter | P0 | Filter by date range | Start/end date params |
@@ -52,9 +63,9 @@
 | Amount filter | P1 | Min/max amount range | Decimal comparison |
 | Transaction notes | P1 | Free-text notes field | Text column |
 | Exclude from reports | P1 | excluded flag | Removes from totals |
-| Bulk update | P0 | Update multiple transactions | Category, tags |
+| Bulk update | P0 | Update multiple transactions | Category, tags, merchant |
 | Bulk delete | P0 | Delete multiple transactions | Confirmation required |
-| Locked attributes | P1 | Prevent editing locked fields | JSONB locked_attributes |
+| Locked attributes | P1 | Prevent editing synced fields | JSONB locked_attributes |
 
 ### 5. Categories & Tags
 
@@ -71,7 +82,21 @@
 | Tag colors | P0 | 10 predefined colors | Color picker |
 | Tag replacement | P1 | Reassign before delete | Prevent orphan taggings |
 
-### 6. Investment Tracking
+### 6. Budgeting
+
+| Feature | Priority | Description | Notes/Edge Cases |
+|---------|----------|-------------|------------------|
+| Monthly budgets | P0 | Budget per calendar month | Auto-created on access |
+| Budget categories | P0 | Allocation per category | Synced with expense categories |
+| Budgeted spending | P0 | Set total budget amount | Per category allocation |
+| Expected income | P1 | Set expected income | Optional tracking |
+| Actual vs budgeted | P0 | Compare spending to budget | Real-time calculation |
+| Overage detection | P0 | Flag over-budget categories | Percentage calculation |
+| Budget navigation | P0 | Navigate months | Limit to 2-year lookback |
+| Donut chart visualization | P0 | Visual budget breakdown | D3.js donut chart |
+| Median/average calculations | P1 | Historical spending analysis | 3-month rolling |
+
+### 7. Investment Tracking
 
 | Feature | Priority | Description | Notes/Edge Cases |
 |---------|----------|-------------|------------------|
@@ -85,7 +110,7 @@
 | Holdings sync | P1 | Gap-fill missing dates | Background job |
 | Security health check | P2 | Verify price availability | Scheduled job |
 
-### 7. Transfers
+### 8. Transfers
 
 | Feature | Priority | Description | Notes/Edge Cases |
 |---------|----------|-------------|------------------|
@@ -95,21 +120,74 @@
 | Reject transfer match | P1 | Prevent future auto-match | RejectedTransfer record |
 | Transfer kinds | P0 | funds_movement, cc_payment, loan_payment | Auto-set on match |
 
-<!-- ### 8. Rules Engine
+<!-- ### 9. Import System
+
+| Feature | Priority | Description | Notes/Edge Cases |
+|---------|----------|-------------|------------------|
+| CSV upload | P0 | Upload transaction CSV | Max row limit |
+| Column mapping | P0 | Map CSV columns to fields | Drag-drop or select |
+| Import types | P0 | Transaction, Trade, Account, Mint | Type-specific processors |
+| Date format selection | P0 | 10+ date format options | Auto-detect attempt |
+| Number format | P0 | Decimal/thousands separator | 4 format options |
+| Signage convention | P0 | Inflows positive/negative | Toggle setting |
+| Amount type strategy | P1 | Signed amount or separate column | For credit/debit columns |
+| Category mapping | P1 | Map CSV categories to system | Fuzzy matching |
+| Tag mapping | P1 | Map CSV tags to system | Create if missing option |
+| Account mapping | P1 | Map CSV accounts to system | For multi-account imports |
+| Import preview | P0 | Preview parsed rows | Edit before confirm |
+| Row editing | P0 | Edit individual rows | Before publishing |
+| Import publish | P0 | Finalize and create entries | Background job |
+| Import revert | P1 | Undo entire import | Deletes created entries |
+| Import templates | P2 | Save/reuse import config | Template application |
+| Duplicate detection | P1 | Warn on potential duplicates | Date + amount + name | -->
+
+<!-- ### 10. Plaid Integration
+
+| Feature | Priority | Description | Notes/Edge Cases |
+|---------|----------|-------------|------------------|
+| Plaid Link | P0 | Connect bank account | Plaid Link SDK |
+| Link token creation | P0 | Generate link token | Short-lived token |
+| Access token exchange | P0 | Exchange public token | Store encrypted |
+| Account sync | P0 | Pull transactions from Plaid | Incremental with cursor |
+| Investment sync | P1 | Pull holdings/trades | Investment accounts |
+| Liability sync | P1 | Pull credit card/loan data | APR, minimum payment |
+| Webhook handling | P0 | Process Plaid notifications | Sync completion events |
+| Connection status | P0 | Good, requires_update | Update mode for re-auth |
+| Multiple institutions | P0 | Connect multiple banks | PlaidItem per connection |
+| Scheduled sync | P1 | Auto-sync on login | family.auto_sync_on_login |
+| Manual sync | P0 | Trigger sync on demand | Per account or all | -->
+
+<!-- ### 11. AI Chat
+
+| Feature | Priority | Description | Notes/Edge Cases |
+|---------|----------|-------------|------------------|
+| Chat creation | P1 | Start new conversation | Auto-title generation |
+| Message send | P1 | Send user message | Async response |
+| AI response | P1 | OpenAI completion | Streaming support |
+| Function calling | P1 | Tool use for data queries | 4 functions defined |
+| Get accounts function | P1 | List family accounts | Includes balances |
+| Get balance sheet function | P1 | Assets, liabilities, net worth | By account type |
+| Get income statement function | P1 | Income/expenses by category | Period-based |
+| Get transactions function | P1 | Filtered transaction list | With pagination |
+| Chat history | P1 | Load previous chats | Per-user |
+| Message retry | P1 | Retry failed response | Error recovery |
+| Debug mode | P2 | Show function call details | Development aid | -->
+
+<!-- ### 12. Rules Engine
 
 | Feature | Priority | Description | Notes/Edge Cases |
 |---------|----------|-------------|------------------|
 | Rule CRUD | P1 | Create, edit, delete rules | Family-scoped |
 | Rule conditions | P1 | If conditions (compound) | AND/OR logic |
-| Condition types | P1 | name, amount | Operators: contains, equals, gt, lt |
-| Rule actions | P1 | Then actions | set_category, set_tags |
+| Condition types | P1 | name, merchant, amount | Operators: contains, equals, gt, lt |
+| Rule actions | P1 | Then actions | set_category, set_merchant, set_tags |
 | Rule preview | P1 | Count affected transactions | Before applying |
 | Rule application | P1 | Apply to matching transactions | Bulk update |
-| Auto-apply | P1 | Apply to new transactions | On creation |
+| Auto-apply | P1 | Apply to new transactions | On sync/import |
 | Rule activation | P1 | Toggle active/inactive | Skip inactive rules |
 | Effective date | P2 | Rule start date | Future-dated rules | -->
 
-### 8. Reporting & Analytics
+### 13. Reporting & Analytics
 
 | Feature | Priority | Description | Notes/Edge Cases |
 |---------|----------|-------------|------------------|
@@ -118,10 +196,10 @@
 | Net worth time series | P0 | Historical net worth chart | Daily data points |
 | Income statement | P0 | Income/expense by category | Period-based |
 | Spending by category | P0 | Category breakdown | Donut chart |
-| Cash flow sankey | P1 | Money flow visualization | shadcn-vue charts |
+| Cash flow sankey | P1 | Money flow visualization | D3.js sankey |
 | Account balance series | P0 | Historical balance chart | Line chart with gradient |
 
-<!-- ### 9. Data Export
+<!-- ### 14. Data Export
 
 | Feature | Priority | Description | Notes/Edge Cases |
 |---------|----------|-------------|------------------|
@@ -129,12 +207,12 @@
 | Export status tracking | P1 | pending, processing, completed, failed | Async job |
 | Export download | P1 | Download generated file | Signed URL | -->
 
-### 9. Settings & Preferences
+### 15. Settings & Preferences
 
 | Feature | Priority | Description | Notes/Edge Cases |
 |---------|----------|-------------|------------------|
 | Profile settings | P0 | Name, email, image | Image upload |
-| Security settings | P0 | Password | Security-sensitive |
+| Security settings | P0 | Password, MFA | Security-sensitive |
 | Preferences | P0 | Theme, default period, sidebar | User-level |
 | Family settings | P1 | Currency, locale, date format | Admin-only |
 | Hosting settings | P1 | API keys, cache clear | Self-hosted only |

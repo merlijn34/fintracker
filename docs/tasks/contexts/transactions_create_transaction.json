@@ -1,0 +1,52 @@
+{
+  "context": "Transactions: create transaction",
+  "tasks": [
+    {
+      "id": "txn-create-01",
+      "title": "Entry + Transaction entities",
+      "scope": "Define Entry and Transaction entities per PRD.",
+      "files": [
+        "apps/api/src/entities/entry.entity.ts",
+        "apps/api/src/entities/transaction.entity.ts"
+      ],
+      "acceptance_criteria": [
+        "Entry supports Transaction/Trade/Valuation types",
+        "Transaction fields match PRD"
+      ],
+      "dependencies": [
+        "acct-create-01"
+      ]
+    },
+    {
+      "id": "txn-create-02",
+      "title": "Create transaction endpoint",
+      "scope": "POST /api/v1/transactions",
+      "files": [
+        "apps/api/src/modules/transactions/*"
+      ],
+      "acceptance_criteria": [
+        "Creates entry + transaction",
+        "Validates category, tags, account"
+      ],
+      "dependencies": [
+        "txn-create-01"
+      ]
+    },
+    {
+      "id": "txn-create-03",
+      "title": "Transaction form UI",
+      "scope": "Create/edit transaction form",
+      "files": [
+        "apps/pwa/pages/transactions/new.vue",
+        "apps/pwa/components/*"
+      ],
+      "acceptance_criteria": [
+        "Submits to API",
+        "Handles validation errors"
+      ],
+      "dependencies": [
+        "txn-create-02"
+      ]
+    }
+  ]
+}

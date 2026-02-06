@@ -1,0 +1,43 @@
+---
+description: High-level coding conventions for the NestJS + Nuxt monorepo.
+globs: apps/**
+alwaysApply: true
+---
+
+This rule documents how to write code for the current stack.
+
+## Project Tech Stack
+
+- Backend: NestJS + TypeScript (`apps/api`)
+  - HTTP server: Fastify
+  - ORM: TypeORM + PostgreSQL
+  - Auth: JWT via `@nestjs/jwt` + `passport-jwt`
+  - Validation: `class-validator` + `class-transformer`
+  - Testing: Jest
+- Frontend: Nuxt 4 + Vue 3 (`apps/pwa`)
+  - Styling: Tailwind CSS
+  - UI: shadcn-nuxt + Reka UI
+  - Forms: HTML5 + vee-validate + zod
+  - Charts: shadcn-vue charts (preferred)
+
+## Backend Conventions (NestJS)
+
+- Prefer thin controllers and move business logic into services.
+- Use DTOs with `class-validator` for request validation.
+- Use TypeORM entities and repositories; avoid inline SQL.
+- Keep module boundaries clear: a module should export its service(s) and public providers only.
+- Do not enable TypeORM `synchronize` in production; use migrations when schema changes are needed.
+- Use explicit return types for public service methods.
+
+## Frontend Conventions (Nuxt/Vue)
+
+- Prefer `<script setup>` SFCs and Composition API.
+- Keep components focused; extract shared logic into composables in `apps/pwa/composables`.
+- Prefer shadcn-nuxt components before rolling custom UI.
+- Use Tailwind utility classes; avoid custom CSS unless necessary.
+
+## General Conventions
+
+- Keep code small and readable; avoid clever abstractions.
+- Match existing patterns and folder structure.
+- Add comments only where logic is non-obvious.

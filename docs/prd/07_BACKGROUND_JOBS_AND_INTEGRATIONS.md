@@ -8,7 +8,7 @@
 |-------|-------------|---------|
 | `scheduled` | 10 | Cron-scheduled jobs |
 | `high_priority` | 4 | Critical jobs (emails) |
-| `medium_priority` | 2 | Sync and import jobs |
+| `medium_priority` | 2 | Sync and recalculation jobs |
 | `low_priority` | 1 | Data cleanup |
 | `default` | 1 | General background work |
 
@@ -24,11 +24,11 @@
 
 #### SyncJob
 ```typescript
-// Triggers: Manual sync, Plaid webhook, auto-sync on login
+// Triggers: Manual sync, auto-sync on login
 // Queue: medium_priority
 
 interface SyncJobPayload {
-  syncableType: 'Account' | 'PlaidItem' | 'Family';
+  syncableType: 'Account' | 'Family';
   syncableId: string;
   windowStartDate?: string;
   windowEndDate?: string;
@@ -40,7 +40,6 @@ interface SyncJobPayload {
 // 2. Update status to syncing
 // 3. Execute sync based on type:
 //    - Account: Calculate balances forward/reverse
-//    - PlaidItem: Fetch transactions from Plaid API
 //    - Family: Sync all accounts
 // 4. Update status to completed or failed
 // 5. Broadcast completion event via WebSocket
@@ -49,75 +48,9 @@ interface SyncJobPayload {
 // Timeout: 5 minutes
 ```
 
-#### ImportJob
-```typescript
-// Triggers: User publishes import
-// Queue: medium_priority
-
-interface ImportJobPayload {
-  importId: string;
-}
-
-// Process:
-// 1. Load Import and ImportRows
-// 2. For each row:
-//    a. Parse according to configuration
-//    b. Create Entry and Transaction/Trade
-//    c. Apply category/tag mappings
-// 3. Queue balance recalculation
-// 4. Update Import status to complete
-
-// Retry: 1 attempt (user can retry manually)
-// Timeout: 10 minutes
-```
-
-#### RevertImportJob
-```typescript
-// Triggers: User reverts import
-// Queue: medium_priority
-
-interface RevertImportJobPayload {
-  importId: string;
-}
-
-// Process:
-// 1. Find all Entries with import_id
-// 2. Delete entries in batches
-// 3. Queue balance recalculation for affected accounts
-// 4. Update Import status
-
-// Retry: 1 attempt
-// Timeout: 10 minutes
-```
-
-#### CreateChatResponseJob
-```typescript
-// Triggers: User sends chat message
-// Queue: default
-
-interface CreateChatResponseJobPayload {
-  chatId: string;
-  messageId: string;
-}
-
-// Process:
-// 1. Load chat and message history
-// 2. Build OpenAI request with function definitions
-// 3. Send request with streaming
-// 4. If function call requested:
-//    a. Execute function (get_accounts, get_transactions, etc.)
-//    b. Return result to OpenAI
-//    c. Get final response
-// 5. Save assistant message
-// 6. Broadcast response via WebSocket
-
-// Retry: 2 attempts
-// Timeout: 2 minutes
-```
-
 #### RuleApplicationJob
 ```typescript
-// Triggers: Rule created/updated, sync complete
+// Triggers: Rule created/updated, transactions created
 // Queue: low_priority
 
 interface RuleApplicationJobPayload {
@@ -156,151 +89,6 @@ interface FamilyDataExportJobPayload {
 ```
 
 ## External Integrations
-
-### Plaid Integration
-
-**Purpose**: Bank account aggregation and transaction syncing
-
-**Authentication**: Client ID + Secret (environment variables)
-
-**API Calls**:
-
-1. **Create Link Token**
-   ```
-   POST /link/token/create
-   Headers: PLAID-CLIENT-ID, PLAID-SECRET
-   Body: { user, client_name, products, country_codes, language }
-   Response: { link_token, expiration }
-   ```
-
-2. **Exchange Public Token**
-   ```
-   POST /item/public_token/exchange
-   Body: { public_token }
-   Response: { access_token, item_id }
-   ```
-
-3. **Get Transactions**
-   ```
-   POST /transactions/sync
-   Body: { access_token, cursor }
-   Response: { added, modified, removed, next_cursor, has_more }
-   ```
-
-4. **Get Accounts**
-   ```
-   POST /accounts/get
-   Body: { access_token }
-   Response: { accounts, item }
-   ```
-
-5. **Get Investment Holdings**
-   ```
-   POST /investments/holdings/get
-   Body: { access_token }
-   Response: { accounts, holdings, securities }
-   ```
-
-6. **Get Liabilities**
-   ```
-   POST /liabilities/get
-   Body: { access_token }
-   Response: { accounts, credit, student, mortgage }
-   ```
-
-**Webhooks**:
-
-| Event | Action |
-|-------|--------|
-| `TRANSACTIONS.SYNC_UPDATES_AVAILABLE` | Queue SyncJob for PlaidItem |
-| `TRANSACTIONS.HISTORICAL_UPDATE` | Full historical sync |
-| `ITEM.ERROR` | Update PlaidItem status to requires_update |
-| `ITEM.PENDING_EXPIRATION` | Notify user to re-authenticate |
-
-**Retry/Failure**:
-- Rate limit: 429 response, exponential backoff
-- Auth error: Mark item as requires_update
-- Transient error: Retry up to 3 times
-
-### OpenAI Integration
-
-**Purpose**: AI chat assistant with financial analysis
-
-**Authentication**: API Key (environment variable)
-
-**API Calls**:
-
-1. **Chat Completion with Functions**
-   ```
-   POST /v1/chat/completions
-   Headers: Authorization: Bearer {api_key}
-   Body: {
-     model: "gpt-4",
-     messages: [...],
-     tools: [...],
-     stream: true
-   }
-   ```
-
-**Function Definitions**:
-
-```typescript
-const functions = [
-  {
-    name: "get_accounts",
-    description: "Get list of user's financial accounts with balances",
-    parameters: {
-      type: "object",
-      properties: {
-        classification: { type: "string", enum: ["asset", "liability"] }
-      }
-    }
-  },
-  {
-    name: "get_balance_sheet",
-    description: "Get current balance sheet with assets, liabilities, and net worth",
-    parameters: {
-      type: "object",
-      properties: {
-        date: { type: "string", format: "date" }
-      }
-    }
-  },
-  {
-    name: "get_income_statement",
-    description: "Get income and expenses for a time period",
-    parameters: {
-      type: "object",
-      properties: {
-        startDate: { type: "string", format: "date" },
-        endDate: { type: "string", format: "date" }
-      },
-      required: ["startDate", "endDate"]
-    }
-  },
-  {
-    name: "get_transactions",
-    description: "Search and filter transactions",
-    parameters: {
-      type: "object",
-      properties: {
-        startDate: { type: "string", format: "date" },
-        endDate: { type: "string", format: "date" },
-        categoryId: { type: "string" },
-        minAmount: { type: "number" },
-        maxAmount: { type: "number" },
-        search: { type: "string" },
-        limit: { type: "integer", maximum: 100 }
-      }
-    }
-  }
-];
-```
-
-**Retry/Failure**:
-- Rate limit: Exponential backoff with jitter
-- Token limit exceeded: Truncate history, retry
-- API error: Retry up to 2 times, then show error to user
 
 ### Synth Finance Integration
 
@@ -369,7 +157,7 @@ const functions = [
 
 ### S3-Compatible Storage
 
-**Purpose**: File uploads (profile images, exports, import files)
+**Purpose**: File uploads (profile images, exports)
 
 **Configuration**:
 ```typescript
@@ -390,5 +178,4 @@ interface StorageConfig {
 
 **File Types**:
 - Profile images: JPEG, PNG (max 5MB)
-- CSV imports: text/csv (max 10MB)
 - Exports: application/zip (generated)

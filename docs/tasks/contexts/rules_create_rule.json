@@ -1,0 +1,51 @@
+{
+  "context": "Rules: create rule",
+  "tasks": [
+    {
+      "id": "rule-01",
+      "title": "Rule entities",
+      "scope": "Define Rule, RuleCondition, RuleAction entities per PRD.",
+      "files": [
+        "apps/api/src/entities/rule*.ts"
+      ],
+      "acceptance_criteria": [
+        "Condition/action enums reflect PRD",
+        "Relations between rule and conditions/actions"
+      ],
+      "dependencies": [
+        "auth-01"
+      ]
+    },
+    {
+      "id": "rule-02",
+      "title": "Rules API",
+      "scope": "CRUD endpoints for rules.",
+      "files": [
+        "apps/api/src/modules/rules/*"
+      ],
+      "acceptance_criteria": [
+        "Create/update/delete rules",
+        "Validations per PRD"
+      ],
+      "dependencies": [
+        "rule-01"
+      ]
+    },
+    {
+      "id": "rule-03",
+      "title": "Rules UI",
+      "scope": "Rule list and rule builder UI.",
+      "files": [
+        "apps/pwa/pages/rules/index.vue",
+        "apps/pwa/pages/rules/new.vue"
+      ],
+      "acceptance_criteria": [
+        "Create rule with conditions/actions",
+        "Persist via API"
+      ],
+      "dependencies": [
+        "rule-02"
+      ]
+    }
+  ]
+}

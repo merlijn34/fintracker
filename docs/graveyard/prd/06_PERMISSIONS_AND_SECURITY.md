@@ -7,7 +7,7 @@
 | Role | Description |
 |------|-------------|
 | `member` | Standard family member with full access to family data |
-| `admin` | Can manage family settings |
+| `admin` | Can manage family settings and invite members |
 | `super_admin` | Internal support role with impersonation capability |
 
 ### Permission Matrix
@@ -21,8 +21,13 @@
 | Create/edit accounts | Yes | Yes | Yes |
 | Delete accounts | Yes | Yes | Yes |
 | Create/edit transactions | Yes | Yes | Yes |
+| Import data | Yes | Yes | Yes |
+| Connect Plaid | Yes | Yes | Yes |
 | View family settings | Yes | Yes | Yes |
 | Update family settings | No | Yes | Yes |
+| Invite family members | No | Yes | Yes |
+| Remove family members | No | Yes | Yes |
+| Manage invite codes | No | Yes | Yes |
 | Impersonate users | No | No | Yes |
 | Access admin tools | No | No | Yes |
 
@@ -30,7 +35,7 @@
 
 | Scope | Permissions |
 |-------|-------------|
-| `read` | Read-only access to accounts and transactions |
+| `read` | Read-only access to accounts, transactions, budgets |
 | `read_write` | Full CRUD access (includes `read`) |
 
 ## Sensitive Actions
@@ -50,9 +55,18 @@
    - Count confirmation dialog
    - Cannot be undone
 
+4. **Import Revert**
+   - Shows affected transaction count
+   - Irreversible action
+
+5. **Plaid Disconnection**
+   - Warns about loss of sync capability
+   - Historical data preserved
+
 ### Password-Protected Actions
 
 1. Change email address
+2. Enable/disable MFA
 3. Generate API keys
 4. Delete user account
 5. Change password
@@ -74,7 +88,13 @@
    - Session tracking with IP and user agent
    - Concurrent session support
 
-3. **Rate Limiting**
+3. **MFA Implementation**
+   - TOTP-based (RFC 6238)
+   - 30-second time step
+   - 6 backup codes (one-time use)
+   - Recovery via backup codes only
+
+4. **Rate Limiting**
    - Login: 5 attempts per minute per IP
    - API: 100 requests per hour per key (configurable)
    - Password reset: 3 attempts per hour per email
@@ -82,7 +102,9 @@
 ### Data Security
 
 1. **Encryption at Rest**
+   - Plaid access tokens encrypted (ActiveRecord Encryption)
    - API key secrets hashed
+   - OTP secrets encrypted
 
 2. **Encryption in Transit**
    - HTTPS enforced in production
@@ -114,6 +136,7 @@
    - User login/logout
    - Failed login attempts
    - Password changes
+   - MFA enable/disable
    - API key creation/revocation
    - Data exports
    - Impersonation sessions
@@ -130,7 +153,7 @@
 ### Security Headers
 
 ```
-Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' wss:;
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' cdn.plaid.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' wss: https://api.openai.com https://production.plaid.com;
 X-Frame-Options: DENY
 X-Content-Type-Options: nosniff
 X-XSS-Protection: 1; mode=block

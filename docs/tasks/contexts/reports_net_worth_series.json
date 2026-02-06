@@ -1,0 +1,37 @@
+{
+  "context": "Reports: net worth series",
+  "tasks": [
+    {
+      "id": "report-nw-01",
+      "title": "Net worth series endpoint",
+      "scope": "GET /api/v1/balance-sheet/net-worth-series per API contract.",
+      "files": [
+        "apps/api/src/modules/reports/*"
+      ],
+      "acceptance_criteria": [
+        "Supports period filter",
+        "Returns trend + series"
+      ],
+      "dependencies": [
+        "acct-create-01",
+        "txn-create-01"
+      ]
+    },
+    {
+      "id": "report-nw-02",
+      "title": "Net worth series UI",
+      "scope": "Net worth chart with shadcn-vue charts.",
+      "files": [
+        "apps/pwa/pages/analytics/index.vue",
+        "apps/pwa/components/*"
+      ],
+      "acceptance_criteria": [
+        "Chart renders series",
+        "Handles empty/loading states"
+      ],
+      "dependencies": [
+        "report-nw-01"
+      ]
+    }
+  ]
+}
